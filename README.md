@@ -1,4 +1,4 @@
-# Trickst and Script
+# Tricks and Scripts
 
 Personal crap.
 
