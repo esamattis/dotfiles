@@ -1,3 +1,7 @@
+# Trickst and Script
+
+Personal crap.
+
 
 ```sh
 cd $HOME/code
@@ -5,11 +9,6 @@ cd $HOME/code
 
 ```sh
 git@github.com:esamattis/dotfiles.git
-```
-or
-
-```sh
-git clone https://github.com/esamattis/dotfiles.git
 ```
 
 Add to `~/.zshrc`
