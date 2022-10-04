@@ -2,6 +2,33 @@
 # https://stackoverflow.com/a/18814147/153718
 _esamatti_dotfiles_dir="${0:A:h}"
 
+_esamatti_dotfiles_init() {
+    local os="$(uname)"
+    local prefix=
+
+    if [ -x "$(command -v brew)" ]; then
+        prefix="$(brew --prefix)"
+    fi
+
+    if [ "$os" = "Darwin" ]; then
+        fpath+=("${prefix}/share/zsh/site-functions")
+
+        # pure installed using homebrew
+        # https://github.com/sindresorhus/pure
+        if [ -f "${prefix}/share/zsh/site-functions/prompt_pure_setup"  ]; then
+            source  "${prefix}/share/zsh/site-functions/prompt_pure_setup"
+        fi
+    fi
+
+    if [ "$os" != "Darwin" ] && [ -x "$(command -v keychain)" ]; then
+        eval $(keychain --eval)
+    fi
+
+}
+
+_esamatti_dotfiles_init
+
+
 export PATH="${_esamatti_dotfiles_dir}/bin:$PATH"
 
 # random crap
@@ -14,9 +41,6 @@ export PATH=$HOME/.local/bin:$PATH
 export PATH=/usr/local/bin:$PATH
 
 
-if [ -f ~/.zsh_plugins.sh ]; then
-  source ~/.zsh_plugins.sh
-fi
 
 # Ensure we're in emacs mode
 bindkey -e
@@ -121,6 +145,7 @@ esamattis-fasd-pick-dir() {
 
 
 zle -N esamattis-fasd-pick-dir
+# Use Ctrl+g to pick recently used directory
 bindkey '^G' esamattis-fasd-pick-dir
 
 export FZF_DEFAULT_COMMAND=esamatti-fzf-find
@@ -132,11 +157,6 @@ export FZF_CTRL_T_COMMAND=esamatti-fzf-find
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 
-if [ "$(uname)" != "Darwin" ]; then
-  if [ -x "$(command -v keychain)" ]; then
-    eval $(keychain --eval)
-  fi
-fi
 
 # https://blog.thecodewhisperer.com/permalink/renaming-magically-with-zmv
 autoload zmv
