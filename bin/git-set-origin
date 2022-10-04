@@ -1,0 +1,8 @@
+#!/bin/sh
+
+set -eu
+
+branch="$(git rev-parse --abbrev-ref HEAD)"
+
+set -x
+git push origin "$branch:$branch" -u
