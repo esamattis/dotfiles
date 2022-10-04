@@ -8,7 +8,7 @@ cd $HOME/code
 ```
 
 ```sh
-git@github.com:esamattis/dotfiles.git
+git clone git@github.com:esamattis/dotfiles.git
 ```
 
 Add to `~/.zshrc`
