@@ -133,7 +133,7 @@ export FZF_CTRL_T_COMMAND=esamatti-fzf-find
 
 
 if [ "$(uname)" != "Darwin" ]; then
-  if [ -x "$(which keychain)" ]; then
+  if [ -x "$(command -v keychain)" ]; then
     eval $(keychain --eval)
   fi
 fi
