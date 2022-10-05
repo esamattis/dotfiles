@@ -1,0 +1,33 @@
+#!/bin/sh
+
+set -eu
+
+if [ "${1-}" = "-h" ] || [ "${1-}" = "--help" ]; then
+    >&2 echo "git subcommand for local random branch generation"
+    >&2 echo "usage: git random-branch"
+    exit 0
+fi
+
+
+rand=""
+read -p 'slug> ' rand
+
+if [ "$rand" != "" ]; then
+    rand="$(echo "$rand" | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')"
+fi
+
+if [ "$rand" = "" ]; then
+    if [ ! -x "$(command -v adj-noun)" ]; then
+        >&2 echo "adj-noun missing."
+        >&2 echo "Install with: npm install -g adj-noun"
+        exit 2
+    fi
+    rand="$(adj-noun | sed 's/ /-/')"
+fi
+
+prefix=${1:-tmp}
+username="$(git config --global github.user || whoami)"
+branch="$prefix/$username/$rand/$(date +"%Y-%m-%d")"
+
+git switch -c "$branch"
+echo "$(date +"%Y-%m-%d %H:%M") $branch" >> "$(git rev-parse --show-toplevel)/.git/random-branch-history.log"
