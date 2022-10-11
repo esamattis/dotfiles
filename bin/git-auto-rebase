@@ -12,4 +12,4 @@ else
     branch="$(git rev-parse --abbrev-ref --symbolic-full-name @{u})"
 fi
 
-echo git rebase -i --autosquash --autostash "$branch"
+git rebase -i --autosquash --autostash "$branch"
