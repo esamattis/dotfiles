@@ -3,10 +3,8 @@
 set -eu
 set -o pipefail
 
-git add-untracked "${1:-}"
-
-if [ "${2:-}" != "" ]; then
-    branch="$2"
+if [ "${1:-}" != "" ]; then
+    branch="$1"
 elif [ -x "$(command -v pr)" ] && gh pr view &>/dev/null; then
     # if on a pr branch get the pr target branch
     branch="origin/$(gh pr view --json baseRefName -q .baseRefName)"
@@ -14,7 +12,4 @@ else
     branch="$(git rev-parse --abbrev-ref --symbolic-full-name @{u})"
 fi
 
-rev=$(git log --oneline HEAD...$branch | fzf --reverse --height 40% --border --ansi --preview 'git show --color=always {1}' | awk '{print $1}')
-
-git commit --fixup=$rev
-
+echo git rebase -i --autosquash --autostash "$branch"

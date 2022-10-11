@@ -35,7 +35,6 @@
   # Sorted tag list
   stag = for-each-ref --sort='*authordate' --format='%(refname:short)' refs/tags
   rh = reset HEAD
-  auto-rebase = rebase -i --autosquash --autostash
   fixup = commit --fixup=HEAD
   cicleanup = commit -m 'cleanup\n\nNon functional code cleaning'
   cistyle = commit -m 'style++\n\nJust a simple style change for the great good'
