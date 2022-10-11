@@ -215,8 +215,9 @@ abbreviate lenght length
 abbreviate lenghts lengths
 abbreviate heigth height
 
-" Open git diff window when editing a commit message
-autocmd FileType gitcommit DiffGitCached | wincmd p
+"" Open git diff window when editing a commit message
+"" Requires fugitive plugin
+" autocmd FileType gitcommit DiffGitCached | wincmd p
 
 " allow the repeat command (.) to execute once for each line of a visual selection
 vnoremap . :normal .<CR>
