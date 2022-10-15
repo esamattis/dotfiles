@@ -2,6 +2,15 @@
 
 set -eu
 
+message=
+
+if [ "${1:-}" = "-m" ]; then
+    message="$2"
+    # Remove the -m and message from the arguments
+    shift
+    shift
+fi
+
 if [ "${1:-}" = "" ]; then
     path="."
     cd "$(git rev-parse --show-toplevel)"
@@ -19,6 +28,10 @@ if [ "$(git diff --cached)" = "" ]; then
     exit 1
 fi
 
+if [ "${message:-}" != "" ]; then
+    git commit -m "$message"
+    exit
+fi
 
 >&2 echo
 >&2 echo "Commit?"
