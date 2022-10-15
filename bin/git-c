@@ -36,8 +36,8 @@ fi
 while true; do
     >&2 echo
     >&2 echo "Commit?"
-    >&2 echo "y = to commit with wip (default)"
-    >&2 echo "c = to commit with cleanup"
+    >&2 echo 'y = to commit with "wip" (default) message'
+    >&2 echo 'c = to commit with "cleanup" message'
     >&2 echo "f = to to make fixup commit"
     >&2 echo "n = to abort"
     >&2 echo "e = to edit commit message"
