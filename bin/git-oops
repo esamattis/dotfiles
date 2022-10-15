@@ -4,7 +4,7 @@ set -eu
 
 # show help
 if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
-    echo "Usage: git-oops"
+    echo "Usage: git oops"
     echo
     echo "Undo previous commit unless it is pushed to origin already"
     echo
