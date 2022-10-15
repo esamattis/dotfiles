@@ -27,6 +27,7 @@
   untracked = cyan
 [alias]
   st = status -sb
+  oops = reset HEAD^
   l = log --graph --pretty=format:'%C(yellow)%h%C(cyan)%d%Creset %s %C(white)- %an, %ar%Creset'
   today = log --since="6am" --graph --pretty=format:'%C(yellow)%h%C(cyan)%d%Creset %s %C(white)- %an, %ar%Creset'
   l-day = !git log --after="$1 00:00" --until="$1 23:59" --author="$(git config user.name)"
