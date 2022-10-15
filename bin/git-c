@@ -38,7 +38,7 @@ fi
 
 while true; do
     >&2 echo
-    >&2 echo "Staged some changes. What now?"
+    >&2 echo "Staged some changes. Now what?"
     >&2 echo
     >&2 echo 'y = commit with "wip" (default) message'
     >&2 echo "n = abort"
