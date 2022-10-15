@@ -15,7 +15,7 @@ upstream_branch="$(git rev-parse --abbrev-ref --symbolic-full-name @{u})"
 upstream_rev="$(git rev-parse "$upstream_branch")"
 local_rev="$(git rev-parse HEAD)"
 
-if [ "$remote_rev" = "$local_rev" ]; then
+if [ "$upstream_rev" = "$local_rev" ]; then
     echo "Cannot undo pushed commits"
     exit 1
 fi
