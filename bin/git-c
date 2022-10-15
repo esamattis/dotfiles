@@ -9,7 +9,6 @@ else
     path="$1"
 fi
 
-
 # Add untracked files
 git ls-files --others --exclude-standard "$path" | xargs git add --intent-to-add
 git add -p "$path"
@@ -19,6 +18,7 @@ if [ "$(git diff --cached)" = "" ]; then
     echo "Nothing to commit"
     exit 1
 fi
+
 
 >&2 echo
 >&2 echo "Commit?"
@@ -36,11 +36,12 @@ elif [ "$option" = "e" ]; then
     git commit
 elif [ "$option" = "f" ]; then
     git commit --fixup=HEAD
+    >&2 echo
     >&2 echo "Rebase now to parent? y/n"
     read -n1 rebase
     if [ "$rebase" = "y" ]; then
-        git rebase -i --autosquash --autostash HEAD^
-        exit
+        git rebase -i --autosquash --autostash HEAD^^
+        exit 0
     fi
 else
     git reset HEAD "$path"
