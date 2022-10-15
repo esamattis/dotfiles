@@ -53,7 +53,7 @@ while true; do
     elif [ "$option" = "f" ]; then
         git commit --fixup=HEAD
         >&2 echo
-        >&2 echo "Rebase now to parent? y/n"
+        >&2 echo "Rebase now to parent commit? y/n"
         read -n1 rebase
         if [ "$rebase" = "y" ]; then
             git rebase -i --autosquash --autostash HEAD^^
