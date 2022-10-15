@@ -20,6 +20,8 @@ fi
 
 # Add untracked files
 git ls-files --others --exclude-standard "$path" | xargs git add --intent-to-add
+
+# Interactive lines from modified and untracked files
 git add -p "$path"
 
 if [ "$(git diff --cached)" = "" ]; then
@@ -28,6 +30,7 @@ if [ "$(git diff --cached)" = "" ]; then
     exit 1
 fi
 
+# Use the provided commit message and exit early
 if [ "${message:-}" != "" ]; then
     git commit -m "$message"
     exit
@@ -56,7 +59,7 @@ while true; do
     elif [ "$option" = "f" ]; then
         git commit --fixup=HEAD
         >&2 echo
-        >&2 echo "Rebase now to parent commit? y/n"
+        >&2 echo "Rebase squash to parent commit now? y/n"
         read -n1 rebase
         if [ "$rebase" = "y" ]; then
             git rebase -i --autosquash --autostash HEAD^^
