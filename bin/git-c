@@ -41,7 +41,6 @@ elif [ "$option" = "f" ]; then
     read -n1 rebase
     if [ "$rebase" = "y" ]; then
         git rebase -i --autosquash --autostash HEAD^^
-        exit 0
     fi
 else
     git reset HEAD "$path"
