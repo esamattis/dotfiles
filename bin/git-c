@@ -49,7 +49,7 @@ while true; do
     elif [ "$option" = "e" ]; then
         git commit
     elif [ "$option" = "n" ]; then
-        git reset HEAD "$path"
+        break
     elif [ "$option" = "f" ]; then
         git commit --fixup=HEAD
         >&2 echo
@@ -64,3 +64,6 @@ while true; do
 
     break
 done
+
+# Clean any --intent-to-add files
+git reset HEAD "$path"
