@@ -2,9 +2,17 @@
 
 set -eu
 
+# show help
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
+    echo "Usage: git-oops"
+    echo
+    echo "Undo previous commit unless it is pushed to origin already"
+    echo
+    exit
+fi
 
-remote_branch="$(git rev-parse --abbrev-ref --symbolic-full-name @{u})"
-remote_rev="$(git rev-parse "$remote_branch")"
+upstream_branch="$(git rev-parse --abbrev-ref --symbolic-full-name @{u})"
+upstream_rev="$(git rev-parse "$upstream_branch")"
 local_rev="$(git rev-parse HEAD)"
 
 if [ "$remote_rev" = "$local_rev" ]; then
