@@ -1,0 +1,47 @@
+#!/bin/bash
+
+set -eu
+
+if [ "${1:-}" = "" ]; then
+    path="."
+    cd "$(git rev-parse --show-toplevel)"
+else
+    path="$1"
+fi
+
+
+# Add untracked files
+git ls-files --others --exclude-standard "$path" | xargs git add --intent-to-add
+git add -p "$path"
+
+if [ "$(git diff --cached)" = "" ]; then
+    git reset HEAD "$path"
+    echo "Nothing to commit"
+    exit 1
+fi
+
+>&2 echo
+>&2 echo "Commit?"
+>&2 echo "y = to commit with wip (default)"
+>&2 echo "f = to to make fixup commit"
+>&2 echo "n = to abort"
+>&2 echo "e = to edit commit message"
+read -n1 option
+>&2 echo
+
+
+if [ "$option" = "y" ] || [ "$option" = "" ] ; then
+    git commit -m wip
+elif [ "$option" = "e" ]; then
+    git commit
+elif [ "$option" = "f" ]; then
+    git commit --fixup=HEAD
+    >&2 echo "Rebase now to parent? y/n"
+    read -n1 rebase
+    if [ "$rebase" = "y" ]; then
+        git rebase -i --autosquash --autostash HEAD^
+        exit
+    fi
+else
+    git reset HEAD "$path"
+fi
