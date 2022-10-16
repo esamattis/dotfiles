@@ -45,6 +45,7 @@ while true; do
     >&2 echo 'c = commit with "cleanup" message'
     >&2 echo "f = to make fixup commit"
     >&2 echo "e = edit commit message"
+    >&2 echo "d = show diff"
     read -n1 option
     >&2 echo
 
@@ -55,6 +56,9 @@ while true; do
         git commit -m cleanup
     elif [ "$option" = "e" ]; then
         git commit
+    elif [ "$option" = "d" ]; then
+        git diff --cached
+        continue
     elif [ "$option" = "n" ]; then
         break
     elif [ "$option" = "f" ]; then
