@@ -65,10 +65,15 @@ while true; do
         git commit --fixup=HEAD
         >&2 echo
         >&2 echo "Rebase squash to parent commit now? y/n"
-        read -n1 rebase
-        if [ "$rebase" = "y" ]; then
-            git rebase -i --autosquash --autostash HEAD^^
-        fi
+        while true; do
+            read -n1 rebase
+            if [ "$rebase" = "y" ]; then
+                git rebase -i --autosquash --autostash HEAD^^
+                break
+            elif [ "$option" = "n" ]; then
+                break
+            fi
+        done
     else
         continue
     fi
