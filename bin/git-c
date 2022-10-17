@@ -40,26 +40,26 @@ while true; do
     >&2 echo
     >&2 echo "Staged some changes. Now what?"
     >&2 echo
-    >&2 echo 'y = commit with "wip" (default) message'
-    >&2 echo "n = abort"
-    >&2 echo 'c = commit with "cleanup" message'
+    >&2 echo 'c = commit'
+    >&2 echo "a = abort"
     >&2 echo "f = to make fixup commit"
-    >&2 echo "e = edit commit message"
     >&2 echo "d = show diff"
     read -n1 option
     >&2 echo
 
 
-    if [ "$option" = "y" ] || [ "$option" = "" ] ; then
-        git commit -m wip
-    elif [ "$option" = "c" ]; then
-        git commit -m cleanup
-    elif [ "$option" = "e" ]; then
-        git commit
+    if [ "$option" = "c" ] || [ "$option" = "" ] ; then
+        read -p "Enter commit message> " commit_message
+        if [ "$commit_message" = "" ]; then
+            # Use the EDITOR to edit the commit message if empty
+            git commit
+        else
+            git commit -m "$commit_message"
+        fi
     elif [ "$option" = "d" ]; then
         git diff --cached
         continue
-    elif [ "$option" = "n" ]; then
+    elif [ "$option" = "a" ]; then
         break
     elif [ "$option" = "f" ]; then
         git commit --fixup=HEAD
