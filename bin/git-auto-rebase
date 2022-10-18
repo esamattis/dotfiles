@@ -19,7 +19,7 @@ else
         >&2 echo
         >&2 echo "u = upstream ($upstream_branch)"
         >&2 echo "g = github pr target ($gh_pr_branch)"
-        >&2 echo "a = abort"
+        >&2 echo "q = quit"
         read -n1 option
 
         if [ "$option" = "u" ]; then
@@ -28,7 +28,7 @@ else
         elif [ "$option" = "g" ]; then
             branch="$gh_pr_branch"
             break
-        elif [ "$option" = "a" ]; then
+        elif [ "$option" = "q" ]; then
             exit 1
         else
             continue
