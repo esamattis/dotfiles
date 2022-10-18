@@ -5,11 +5,37 @@ set -o pipefail
 
 if [ "${1:-}" != "" ]; then
     branch="$1"
-elif [ -x "$(command -v pr)" ] && gh pr view &>/dev/null; then
-    # if on a pr branch get the pr target branch
-    branch="origin/$(gh pr view --json baseRefName -q .baseRefName)"
 else
-    branch="$(git rev-parse --abbrev-ref --symbolic-full-name @{u})"
+    upstream_branch="$(git rev-parse --abbrev-ref --symbolic-full-name @{u})"
+    gh_pr_branch=
+
+    if [ -x "$(command -v pr)" ] && gh pr view &>/dev/null; then
+        gh_pr_branch="origin/$(gh pr view --json baseRefName -q .baseRefName)"
+    fi
+
+    while true; do
+        >&2 echo
+        >&2 echo "Rebase to?"
+        >&2 echo
+        >&2 echo "u = upstream ($upstream_branch)"
+        >&2 echo "g = github pr target ($gh_pr_branch)"
+        >&2 echo "a = abort"
+        read -n1 option
+
+        if [ "$option" = "u" ]; then
+            branch="$upstream_branch"
+            break
+        elif [ "$option" = "g" ]; then
+            branch="$gh_pr_branch"
+            break
+        elif [ "$option" = "a" ]; then
+            exit 1
+        else
+            continue
+        fi
+        >&2 echo
+    done
+    >&2 echo
 fi
 
 git rebase -i --autosquash --autostash "$branch"
