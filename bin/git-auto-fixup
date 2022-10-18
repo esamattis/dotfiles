@@ -14,7 +14,7 @@ branch=
 
 while true; do
     >&2 echo
-    >&2 echo "Rebase to? "
+    >&2 echo "Rebase to?"
     >&2 echo
     >&2 echo "p = parent ($(git log --oneline HEAD -1))"
     >&2 echo "u = upstream ($upstream_branch)"
