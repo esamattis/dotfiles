@@ -24,7 +24,7 @@ while true; do
     read -n1 option
 
     if [ "$option" = "p" ]; then
-        branch=HEAD^
+        branch=HEAD
         break
     elif [ "$option" = "u" ]; then
         branch="$upstream_branch"
@@ -49,7 +49,12 @@ if [ "$branch" = "" ]; then
 fi
 
 local_rev="$(git rev-parse HEAD)"
-target_rev="$(git rev-parse "$branch")"
+
+if [ "$branch" = "HEAD" ]; then
+    target_rev="$(git rev-parse "$upstream_branch")"
+else
+    target_rev="$(git rev-parse "$branch")"
+fi
 
 if [ "$target_rev" = "$local_rev" ]; then
     >&2 echo "No commit available to run fixup against. Everything is pushed."
@@ -59,7 +64,7 @@ fi
 git add-untracked "${1:-}"
 
 
-if [ "$branch" = "HEAD^" ]; then
+if [ "$branch" = "HEAD" ]; then
     git commit --fixup=HEAD
     git rebase -i --autosquash --autostash HEAD^^
 else
