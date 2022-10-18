@@ -40,10 +40,10 @@ while true; do
     >&2 echo
     >&2 echo "Staged some changes. Now what?"
     >&2 echo
-    >&2 echo 'c = commit'
-    >&2 echo "a = abort"
+    >&2 echo "c = commit"
     >&2 echo "f = to make fixup commit"
     >&2 echo "d = show diff"
+    >&2 echo "q = quit"
     read -n1 option
     >&2 echo
 
@@ -59,7 +59,7 @@ while true; do
     elif [ "$option" = "d" ]; then
         git diff --cached
         continue
-    elif [ "$option" = "a" ]; then
+    elif [ "$option" = "q" ]; then
         break
     elif [ "$option" = "f" ]; then
         git commit --fixup=HEAD
