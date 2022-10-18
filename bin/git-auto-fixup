@@ -42,6 +42,7 @@ while true; do
     fi
     >&2 echo
 done
+>&2 echo
 
 if [ "$branch" = "" ]; then
     >&2 echo "No branch to fixup to. Abort."
