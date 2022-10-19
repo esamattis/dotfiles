@@ -49,13 +49,24 @@ while true; do
 
 
     if [ "$option" = "c" ] || [ "$option" = "" ] ; then
-        read -p "Enter commit message> " commit_message
-        if [ "$commit_message" = "" ]; then
-            # Use the EDITOR to edit the commit message if empty
-            git commit
-        else
-            git commit -m "$commit_message"
-        fi
+        while true; do
+            >&2 echo
+            >&2 echo 'e = edit with $EDITOR'
+            >&2 echo "q = quit"
+            read -p "Enter commit message> " commit_message
+            if [ "$commit_message" = "" ]; then
+                continue
+            elif [ "$commit_message" = "q" ]; then
+                break
+            elif [ "$commit_message" = "e" ]; then
+                # Use the EDITOR to edit the commit message if empty
+                git commit
+                break
+            else
+                git commit -m "$commit_message"
+                break
+            fi
+        done
     elif [ "$option" = "d" ]; then
         git diff --cached
         continue
