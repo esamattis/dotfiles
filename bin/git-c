@@ -41,7 +41,6 @@ while true; do
     >&2 echo "Staged some changes. Now what?"
     >&2 echo
     >&2 echo "c = commit"
-    >&2 echo "f = to make fixup commit"
     >&2 echo "d = show diff"
     >&2 echo "q = quit"
     read -n1 option
@@ -72,20 +71,6 @@ while true; do
         continue
     elif [ "$option" = "q" ]; then
         break
-    elif [ "$option" = "f" ]; then
-        git commit --fixup=HEAD
-        >&2 echo
-        while true; do
-            >&2 echo "Rebase squash to parent commit now? y/n"
-            read -n1 rebase
-            if [ "$rebase" = "y" ]; then
-                git rebase -i --autosquash --autostash HEAD^^
-                break
-            elif [ "$rebase" = "n" ]; then
-                break
-            fi
-            >&2 echo
-        done
     else
         continue
     fi
