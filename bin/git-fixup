@@ -62,10 +62,10 @@ if [ "$target_rev" = "$local_rev" ]; then
     exit 1
 fi
 
-git log --oneline HEAD...$branch
->&2 echo
->&2 echo "Press any key to continue. Ctrl-C to abort."
-read -n1 wait
+# git log --oneline HEAD...$branch
+# >&2 echo
+# >&2 echo "Press any key to continue. Ctrl-C to abort."
+# read -n1 wait
 
 git add-untracked "${1:-}"
 
