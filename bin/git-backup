@@ -1,0 +1,26 @@
+#!/bin/sh
+
+set -eu
+
+if [ "${1-}" = "-h" ] || [ "${1-}" = "--help" ]; then
+    >&2 echo "Backup current branch and any changes"
+    exit 0
+fi
+
+cd "$(git rev-parse --show-toplevel)"
+initial_branch="$(git rev-parse --abbrev-ref HEAD)"
+backup_branch="backup/$(date +"%Y-%m-%dT%H-%M-%S")"
+current_rev="$(git rev-parse HEAD)"
+
+if [  "$(git status --porcelain)" != "" ]; then
+    git add .
+    git commit -m "backup"
+fi
+
+git switch -c "$backup_branch"
+git reset "$initial_branch"
+git reset "$current_rev"
+
+echo
+echo
+echo "Backup in $backup_branch"
