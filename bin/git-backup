@@ -26,7 +26,7 @@ fi
 
 git switch -c "$backup_branch"
 git reset "$initial_branch"
-git reset "$current_rev"
+git switch "$current_rev"
 
 echo
 echo
