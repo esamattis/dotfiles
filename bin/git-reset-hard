@@ -7,7 +7,7 @@ message=
 upstream_branch="$(git rev-parse --abbrev-ref --symbolic-full-name @{u})"
 branch="${1:-$upstream_branch}"
 
->&2 echo "Reset hard to $branch"
+>&2 echo "Reset hard to ${branch}?"
 read -p "type 'y' to continue> " commit_message
 
 if [ "$commit_message" != "y" ]; then
