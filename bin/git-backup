@@ -14,10 +14,17 @@ if [ "$(git diff --cached --name-only)" != "" ]; then
     exit 1
 fi
 
+read -p "Backup message> " message
+
+
 initial_branch="$(git rev-parse --abbrev-ref HEAD)"
 initial_rev="$(git rev-parse HEAD)"
 backup_branch="backup/$(date +"%Y-%m-%dT%H-%M-%S")"
 
+if [ "$message" != "" ]; then
+    message="$(echo "$message" | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')"
+    backup_branch="$backup_branch/$message"
+fi
 
 if [  "$(git status --porcelain)" != "" ]; then
     git add .
