@@ -8,9 +8,16 @@ if [ "${1-}" = "-h" ] || [ "${1-}" = "--help" ]; then
 fi
 
 cd "$(git rev-parse --show-toplevel)"
+
+if [ "$(git diff --cached --name-only)" != "" ]; then
+    echo "Staged changes detected. Cannot backup"
+    exit 1
+fi
+
 initial_branch="$(git rev-parse --abbrev-ref HEAD)"
 backup_branch="backup/$(date +"%Y-%m-%dT%H-%M-%S")"
 current_rev="$(git rev-parse HEAD)"
+
 
 if [  "$(git status --porcelain)" != "" ]; then
     git add .
