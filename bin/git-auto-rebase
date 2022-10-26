@@ -8,17 +8,32 @@ if [ "${1:-}" != "" ]; then
 else
     upstream_branch="$(git rev-parse --abbrev-ref --symbolic-full-name @{u})"
     gh_pr_branch=
+    first_pr_commit=
 
     if [ -x "$(command -v pr)" ] && gh pr view &>/dev/null; then
         gh_pr_branch="origin/$(gh pr view --json baseRefName -q .baseRefName)"
     fi
+
+
+    if [ "$gh_pr_branch" != "" ]; then
+        first_pr_commit="$(git log  "--pretty=format:%H" ${gh_pr_branch}...HEAD --reverse | awk 'NR==1{print $1}')"
+    fi
+
 
     while true; do
         >&2 echo
         >&2 echo "Rebase to?"
         >&2 echo
         >&2 echo "u = upstream ($upstream_branch)"
-        >&2 echo "g = github pr target ($gh_pr_branch)"
+
+        if  [ "$gh_pr_branch" != "" ]; then
+            >&2 echo "g = github pr target ($gh_pr_branch)"
+        fi
+
+        if [ "$first_pr_commit" != "" ]; then
+            >&2 echo "f = first pr commit ($(git log "--pretty=format:%h %s" $first_pr_commit -1))"
+        fi
+
         >&2 echo "q = quit"
         read -n1 option
 
@@ -27,6 +42,9 @@ else
             break
         elif [ "$option" = "g" ]; then
             branch="$gh_pr_branch"
+            break
+        elif [ "$option" = "f" ]; then
+            branch="$first_pr_commit"
             break
         elif [ "$option" = "q" ]; then
             exit 1
