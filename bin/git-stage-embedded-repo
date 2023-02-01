@@ -1,10 +1,18 @@
 #!/bin/bash
 
+# Workaround for
+#
+#    warning: adding embedded git repository: ***
+#    hint: You've added another git repository inside your current repository.
+#    hint: Clones of the outer repository will not contain the contents of
+#    hint: the embedded repository and will not know how to obtain it.
+#
+
 set -eu
 set -o pipefail
 
 if [ "${1-}" = "-h" ] || [ "${1-}" = "--help" ] || [  "${1-}" = "" ]; then
-    >&2 echo "Add only the file of an embedded repo to the index. Eg. a directory with .git inside it."
+    >&2 echo "Add the files of an embedded repo to the index. Eg. a directory with .git inside it."
     >&2 echo "usage: git stage-embedded-repo <path>"
     exit 0
 fi
@@ -15,6 +23,10 @@ git reset HEAD "$path"
 
 if [ -d "$path/.git" ]; then
     mv "$path/.git" "$path/.git.tmp"
+else
+    >&2 echo "Not a an embedded repo."
+    >&2 echo "No .git directory found in $path"
+    exit 1
 fi
 
 git add "$path" :!$path/.git.tmp
