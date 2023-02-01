@@ -127,6 +127,8 @@ bindkey  "^[[3~"  delete-char
 # Fix esc dot for WSL2
 bindkey '\e.' insert-last-word
 
+# Repeat the command n times and break on non-zero exit
+# usage: repeat_n 3 jest test.ts
 repeat_n () {
   local n=$1
   shift
