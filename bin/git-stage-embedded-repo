@@ -1,0 +1,24 @@
+#!/bin/bash
+
+set -eu
+set -o pipefail
+
+if [ "${1-}" = "-h" ] || [ "${1-}" = "--help" ] || [  "${1-}" = "" ]; then
+    >&2 echo "Add only the file of an embedded repo to the index. Eg. a directory with .git inside it."
+    >&2 echo "usage: git stage-embedded-repo <path>"
+    exit 0
+fi
+
+path="$1"
+
+git reset HEAD "$path"
+
+if [ -d "$path/.git" ]; then
+    mv "$path/.git" "$path/.git.tmp"
+fi
+
+git add "$path" :!$path/.git.tmp
+
+if [ -d "$path/.git.tmp" ]; then
+    mv "$path/.git.tmp" "$path/.git"
+fi
