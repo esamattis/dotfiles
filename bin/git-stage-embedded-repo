@@ -12,25 +12,28 @@ set -eu
 set -o pipefail
 
 if [ "${1-}" = "-h" ] || [ "${1-}" = "--help" ] || [  "${1-}" = "" ]; then
-    >&2 echo "Add the files of an embedded repo to the index. Eg. a directory with .git inside it."
+    >&2 echo "Stage files of an embbedded repo to the parent repo. Eg. a directory with .git inside it."
     >&2 echo "usage: git stage-embedded-repo <path>"
     exit 0
 fi
 
 path="$1"
 
+# Clear any previous staging
 git reset HEAD "$path"
 
+# Nested directories cannot be staged if they contain .git. Rename it so git
+# won't detect it.
 if [ -d "$path/.git" ]; then
     mv "$path/.git" "$path/.git.tmp"
 else
     >&2 echo "Not an embedded repo."
-    >&2 echo "No .git directory found in $path"
+    >&2 echo "No .git directory found in $path/.git"
     exit 1
 fi
 
+# Stage the files except .git.tmp
 git add "$path" :!$path/.git.tmp
 
-if [ -d "$path/.git.tmp" ]; then
-    mv "$path/.git.tmp" "$path/.git"
-fi
+# Restore the .git directory
+mv "$path/.git.tmp" "$path/.git"
