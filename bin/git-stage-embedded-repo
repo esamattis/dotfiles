@@ -24,7 +24,7 @@ git reset HEAD "$path"
 if [ -d "$path/.git" ]; then
     mv "$path/.git" "$path/.git.tmp"
 else
-    >&2 echo "Not a an embedded repo."
+    >&2 echo "Not an embedded repo."
     >&2 echo "No .git directory found in $path"
     exit 1
 fi
