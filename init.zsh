@@ -80,14 +80,7 @@ setopt HIST_BEEP                 # Beep when accessing nonexistent history.
 # https://github.com/andrewferrier/fzf-z#sources-of-information
 export FZFZ_SUBDIR_LIMIT=0
 
-
-if [ "${EDITOR:-}" = "" ]; then
-  if [ -x "$(which nvim)" ]; then
-    export EDITOR=nvim
-  else
-    export EDITOR=vi
-  fi
-fi
+export EDITOR=vi
 
 # Not enough contrast in the default colors
 zstyle ':prompt:pure:prompt:success' color cyan
