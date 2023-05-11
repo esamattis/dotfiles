@@ -1,0 +1,7 @@
+#!/bin/sh
+
+set -eu
+
+branch=$(git branch --sort=-committerdate --format '%(refname:short)' | head -n 10 | fzf)
+
+git switch "$branch"
