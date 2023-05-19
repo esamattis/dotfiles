@@ -1,0 +1,5 @@
+#!/bin/sh
+
+set -eu
+
+open -a alacritty --args --working-directory $PWD $@
