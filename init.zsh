@@ -193,3 +193,13 @@ ni() {
     npm install
   fi
 }
+
+dark()  {
+  iterm-profile.py Dark
+  export ITERM_PROFILE=Dark
+}
+
+light()  {
+  iterm-profile.py Light
+  export ITERM_PROFILE=Light
+}
