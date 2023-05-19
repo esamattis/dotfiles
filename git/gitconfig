@@ -61,3 +61,8 @@
 	lineNumber = true
 [pull]
 	ff = only
+[init]
+	defaultBranchl = main
+	defaultBranch = main
+[include]
+  path = ~/.gitconfig.local
