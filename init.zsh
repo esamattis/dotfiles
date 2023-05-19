@@ -28,6 +28,8 @@ _esamatti_dotfiles_init() {
 
 _esamatti_dotfiles_init
 
+# not in path on macos?
+export PATH=/usr/local/bin:$PATH
 
 export PATH="${_esamatti_dotfiles_dir}/bin:$PATH"
 
@@ -37,8 +39,6 @@ export PATH=$HOME/bin:$PATH
 # pip --user
 export PATH=$HOME/.local/bin:$PATH
 
-# not in path on macos?
-export PATH=/usr/local/bin:$PATH
 
 
 
@@ -80,7 +80,7 @@ setopt HIST_BEEP                 # Beep when accessing nonexistent history.
 # https://github.com/andrewferrier/fzf-z#sources-of-information
 export FZFZ_SUBDIR_LIMIT=0
 
-export EDITOR=vi
+export EDITOR=vim-clean
 
 # Not enough contrast in the default colors
 zstyle ':prompt:pure:prompt:success' color cyan

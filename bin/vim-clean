@@ -1,0 +1,8 @@
+#!/bin/sh
+
+set -eu
+
+# start vim without VIMRUNTIME so it can start inside neovim terminal embed
+
+unset VIMRUNTIME
+exec /usr/local/bin/vi "$@"
