@@ -203,3 +203,78 @@ light()  {
   iterm-profile.py Light
   export ITERM_PROFILE=Light
 }
+
+gwr() {
+    cd "$(git rev-parse --show-toplevel)"
+    if [ -f .git ]; then
+      cd ..
+      cd "$(git rev-parse --show-toplevel)"
+    fi
+}
+
+gwj() {
+  local dir=$(
+    gwr
+    git worktree list  | fzf --header="Jump to git worktree"
+  )
+
+  dir=$(echo "$dir" | cut -f 1 -d ' ')
+
+  if [ -d "$dir" ]; then
+    cd "$dir"
+  fi
+}
+
+
+gwc() {
+  git fetch --all
+  # local branch=$(git branch -r | cut -d / -f 2- | fzf --header="Checkout git worktree")
+  local branch=$(git branch -r --sort=-committerdate --format '%(refname:short)' | head -n 20 | cut -c 8- | fzf --header="Select branch")
+  gwr
+
+  local checkout_dir=".worktrees/$branch"
+
+  if [ "${1:-}" != "" ]; then
+    checkout_dir=".worktrees/$1"
+  fi
+
+  if [ -d "$checkout_dir" ]; then
+    cd "$checkout_dir"
+    echo "Already checked out"
+    return
+  fi
+
+  git worktree add "$checkout_dir" "$branch" 
+  cd "$checkout_dir"
+
+  if [ -f pnpm-lock.yaml ] && [ ! -d node_modules ]; then
+    read -q "REPLY?Install pnpm deps? "
+    if [ "$REPLY" = "y" ]; then
+      pnpm install
+    fi
+  fi
+}
+
+
+gwdestroy() {
+  cd "$(git rev-parse --show-toplevel)"
+
+  if [ ! -f .git ]; then
+    echo "not a git worktree"
+    return 1
+  fi
+
+
+  read -q "REPLY?Are you sure? "
+  if [ ! "$REPLY" = "y" ]; then
+    return 1
+  fi
+
+
+  local worktree_path=$(pwd)
+
+  gwr
+  git worktree remove "$worktree_path"
+}
+
+
