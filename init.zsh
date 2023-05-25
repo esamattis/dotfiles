@@ -94,6 +94,7 @@ alias keyboard-assistant='sudo open /System/Library/CoreServices/KeyboardSetupAs
 alias node_modules_to_path='export PATH="$(pwd)/node_modules/.bin":$PATH'
 alias find_old_node_modules='find . -name node_modules -type d -maxdepth 2 -mtime +30'
 alias cd-git-root='cd "$(git rev-parse --show-toplevel)"'
+alias gbj="git branch-jump"
 
 
 git-add-to-existing() {

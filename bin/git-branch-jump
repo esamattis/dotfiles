@@ -2,6 +2,13 @@
 
 set -eu
 
-branch=$(git branch --sort=-committerdate --format '%(refname:short)' | head -n 10 | fzf)
+if [ "${1:-}" = "-r" ]; then
+    git fetch --all
+    echo
+    branch=$(git branch -r --sort=-committerdate --format '%(refname:short)' | head -n 50 | cut -c 8- | fzf --header="Remote branch")
+else
+    branch=$(git branch --sort=-committerdate --format '%(refname:short)' | head -n 50 | fzf --header="Local branch")
+fi
+
 
 git switch "$branch"
