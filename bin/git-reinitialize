@@ -18,12 +18,9 @@ fi
 
 
 add_remote() {
-    local line="$1"
-    local remote="$(echo $line | cut -d' ' -f1)"
-    local url="$(echo $line | cut -d' ' -f2)"
-    local branch="$(echo $line | cut -d' ' -f3)"
-
-
+    local remote="$1"
+    local url="$2"
+    local branch="${3:-}"
 
     # if git has remote
     if git remote | grep -q "^$remote$"; then
@@ -56,7 +53,7 @@ fi
 initial_branch="$(git branch --show-current)"
 
 if [ "${1:-}" != "" ]; then
-    add_remote "$1 $2 ${3:-}"
+    add_remote $1 $2 ${3:-}
     git switch "$initial_branch"
     exit 0
 fi
@@ -69,7 +66,7 @@ fi
 
 cat .gitremotes | while read line 
 do
-    add_remote "$line"
+    add_remote $line
 done
 
 git switch "$initial_branch"
