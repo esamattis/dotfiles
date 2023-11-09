@@ -5,12 +5,12 @@ set -o pipefail
 
 if [ "${1:-}" = "-h" ] || [  "${1:-}" = "-h" ]; then
     echo
-    echo "Reinitialize .git directory with remotes and branches from a .gitremotes file"
+    echo "Reinitialize .git directory with remotes and branches from a .gitremote file"
     echo
-    echo "Line format in .gitremotes file:"
+    echo "Line format in .gitremote file:"
     echo "    remote-name remote-url [branch]"
     echo
-    echo "Pass the values directly as arguments to skip the .gitremotes file:"
+    echo "Pass the values directly as arguments to skip the .gitremote file:"
     echo "    git-reinitialize [remote] [url] [branch]"
     echo
     exit 0
@@ -58,13 +58,13 @@ if [ "${1:-}" != "" ]; then
     exit 0
 fi
 
-if [ ! -f .gitremotes ]; then
-    >&2 echo "No .gitremotes file found"
+if [ ! -f .gitremote ]; then
+    >&2 echo "No .gitremote file found"
     exit 1
 fi
 
 
-cat .gitremotes | while read line 
+cat .gitremote | while read line 
 do
     add_remote $line
 done
