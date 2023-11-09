@@ -3,6 +3,17 @@
 set -eu
 set -o pipefail
 
+if [ "${1:-}" = "-h" ] || [  "${1:-}" = "-h" ]; then
+    echo
+    echo "Reinitialize .git directory with remotes and branches from a .gitremotes file"
+    echo "Usage: git-reinitialize"
+    echo
+    echo "Or from the command line"
+    echo
+    echo "Usage: git-reinitialize [remote] [url] [branch]"
+    echo
+    exit 0
+fi
 
 
 add_remote() {
@@ -11,9 +22,6 @@ add_remote() {
     local url="$(echo $line | cut -d' ' -f2)"
     local branch="$(echo $line | cut -d' ' -f3)"
 
-    if [ ! -d .git ]; then
-        git init
-    fi
 
 
     # if git has remote
@@ -38,21 +46,17 @@ add_remote() {
 
 }
 
-if [ "${1:-}" = "-h" ] || [  "${1:-}" = "-h" ]; then
-    echo
-    echo "Usage: git-reinitialize [remote] [url] [branch]"
-    echo "Usage: git-reinitialize"
-    echo
-    echo "If no arguments are provided, git-reinitialize will read .gitremotes file and add remotes"
-    echo
 
-    exit 0
+
+if [ ! -d .git ]; then
+    git init
 fi
 
-set -x
+initial_branch="$(git branch --show-current)"
 
 if [ "${1:-}" != "" ]; then
     add_remote "$1 $2 ${3:-}"
+    git switch "$initial_branch"
     exit 0
 fi
 
@@ -61,8 +65,6 @@ if [ ! -f .gitremotes ]; then
     exit 1
 fi
 
-
-initial_branch="$(git branch --show-current)"
 
 cat .gitremotes | while read line 
 do
