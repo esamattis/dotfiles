@@ -1,0 +1,35 @@
+#!/bin/bash
+
+set -eu
+set -o pipefail
+
+
+if [ ! -f .gitremotes ]; then
+    >&2 echo "No .gitremotes file found"
+    exit 1
+fi
+
+if [ ! -d .git ]; then
+    git init
+fi
+
+cat .gitremotes | while read line 
+do
+    remote="$(echo $line | cut -d':' -f1)"
+    url="$(echo $line | cut -d':' -f2)"
+
+    # if git has remote
+    if git remote | grep -q "^$remote$"; then
+        >&2 echo "git remote $remote already exists"
+    else
+        >&2 echo "Adding remote $remote"
+        git remote add "$remote" "$url"
+        git fetch "$remote"
+    fi
+
+    if [ "$remote" = "origin" ]; then
+        # set upstream branch
+        # upstream_branch="$(git rev-parse --abbrev-ref --symbolic-full-name @{u})"
+    fi
+
+done
