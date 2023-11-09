@@ -6,11 +6,12 @@ set -o pipefail
 if [ "${1:-}" = "-h" ] || [  "${1:-}" = "-h" ]; then
     echo
     echo "Reinitialize .git directory with remotes and branches from a .gitremotes file"
-    echo "Usage: git-reinitialize"
     echo
-    echo "Or from the command line"
+    echo "Line format in .gitremotes file:"
+    echo "    remote-name remote-url [branch]"
     echo
-    echo "Usage: git-reinitialize [remote] [url] [branch]"
+    echo "Pass the values directly as arguments to skip the .gitremotes file:"
+    echo "    git-reinitialize [remote] [url] [branch]"
     echo
     exit 0
 fi
