@@ -50,11 +50,9 @@ if [ ! -d .git ]; then
     git init
 fi
 
-initial_branch="$(git branch --show-current)"
 
 if [ "${1:-}" != "" ]; then
     add_remote $1 $2 ${3:-}
-    git switch "$initial_branch"
     exit 0
 fi
 
@@ -68,5 +66,3 @@ cat .gitremote | while read line
 do
     add_remote $line
 done
-
-git switch "$initial_branch"
