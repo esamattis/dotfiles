@@ -26,7 +26,7 @@ add_remote() {
     if git remote | grep -q "^$remote$"; then
         >&2 echo "git remote $remote already exists"
     else
-        >&2 echo "Adding remote $remote"
+        >&2 echo "Adding remote $remote from $url"
         git remote add "$remote" "$url"
         git fetch "$remote"
 
