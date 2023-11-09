@@ -8,10 +8,10 @@ if [ "${1:-}" = "-h" ] || [  "${1:-}" = "-h" ]; then
     echo "Reinitialize .git directory with remotes and branches from a .gitremote file"
     echo
     echo "Line format in .gitremote file:"
-    echo "    remote-name remote-url [branch]"
+    echo "    <remote-name> <remote-url> [branch]"
     echo
     echo "Pass the values directly as arguments to skip the .gitremote file:"
-    echo "    git-reinitialize [remote] [url] [branch]"
+    echo "    git-reinitialize <remote> <url> [branch]"
     echo
     exit 0
 fi
