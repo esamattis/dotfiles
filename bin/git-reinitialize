@@ -4,19 +4,17 @@ set -eu
 set -o pipefail
 
 
-if [ ! -f .gitremotes ]; then
-    >&2 echo "No .gitremotes file found"
-    exit 1
-fi
 
-if [ ! -d .git ]; then
-    git init
-fi
+add_remote() {
+    local line="$1"
+    local remote="$(echo $line | cut -d' ' -f1)"
+    local url="$(echo $line | cut -d' ' -f2)"
+    local branch="$(echo $line | cut -d' ' -f3)"
 
-cat .gitremotes | while read line 
-do
-    remote="$(echo $line | cut -d':' -f1)"
-    url="$(echo $line | cut -d':' -f2)"
+    if [ ! -d .git ]; then
+        git init
+    fi
+
 
     # if git has remote
     if git remote | grep -q "^$remote$"; then
@@ -25,11 +23,50 @@ do
         >&2 echo "Adding remote $remote"
         git remote add "$remote" "$url"
         git fetch "$remote"
+
+        if [ "$branch" = "" ]; then
+            branch="$(git remote show $remote | sed -n '/HEAD branch/s/.*: //p')"
+        fi
+
+        if [ "$(git branch --show-current)" != "$branch" ]; then
+            git switch -c "$branch"
+        fi
+
+        git reset "$remote/$branch"
+        git branch --set-upstream-to $remote/$branch
     fi
 
-    if [ "$remote" = "origin" ]; then
-        # set upstream branch
-        # upstream_branch="$(git rev-parse --abbrev-ref --symbolic-full-name @{u})"
-    fi
+}
 
+if [ "${1:-}" = "-h" ] || [  "${1:-}" = "-h" ]; then
+    echo
+    echo "Usage: git-reinitialize [remote] [url] [branch]"
+    echo "Usage: git-reinitialize"
+    echo
+    echo "If no arguments are provided, git-reinitialize will read .gitremotes file and add remotes"
+    echo
+
+    exit 0
+fi
+
+set -x
+
+if [ "${1:-}" != "" ]; then
+    add_remote "$1 $2 ${3:-}"
+    exit 0
+fi
+
+if [ ! -f .gitremotes ]; then
+    >&2 echo "No .gitremotes file found"
+    exit 1
+fi
+
+
+initial_branch="$(git branch --show-current)"
+
+cat .gitremotes | while read line 
+do
+    add_remote "$line"
 done
+
+git switch "$initial_branch"
