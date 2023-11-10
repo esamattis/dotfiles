@@ -25,24 +25,25 @@ add_remote() {
     # if git has remote
     if git remote | grep -q "^$remote$"; then
         >&2 echo "git remote $remote already exists"
-    else
-        >&2 echo "Adding remote $remote from $url"
-        git remote add "$remote" "$url"
-        git fetch "$remote"
+        return
+    fi
 
-        if [ "$branch" = "" ]; then
-            branch="$(git remote show $remote | sed -n '/HEAD branch/s/.*: //p')"
-        fi
+    >&2 echo "Adding remote $remote from $url"
+    git remote add "$remote" "$url"
+    git fetch "$remote"
 
-        if [ "$(git branch --show-current)" != "$branch" ]; then
-            git switch -c "$branch"
-        fi
+    if [ "$branch" = "" ]; then
+        branch="$(git remote show $remote | sed -n '/HEAD branch/s/.*: //p')"
+    fi
 
-        git reset "$remote/$branch"
+    if [ "$(git branch --show-current)" != "$branch" ]; then
+        git switch -c "$branch"
+    fi
 
-        if [ "$remote" = "origin" ]; then
-            git branch --set-upstream-to $remote/$branch
-        fi
+    git reset "$remote/$branch"
+
+    if [ "$remote" = "origin" ]; then
+        git branch --set-upstream-to $remote/$branch
     fi
 
 }
