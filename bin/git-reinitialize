@@ -25,24 +25,31 @@ add_remote() {
     # if git has remote
     if git remote | grep -q "^$remote$"; then
         >&2 echo "git remote $remote already exists"
-        return
+
+        local option=
+        read -p "delete? y/n> " -n1 option
+        if [ "$option" = "y" ]; then
+            git remote remove "$remote"
+        else
+            return
+        fi
     fi
 
     >&2 echo "Adding remote $remote from $url"
     git remote add "$remote" "$url"
     git fetch "$remote"
 
-    if [ "$branch" = "" ]; then
-        branch="$(git remote show $remote | sed -n '/HEAD branch/s/.*: //p')"
-    fi
-
-    if [ "$(git branch --show-current)" != "$branch" ]; then
-        git switch -c "$branch"
-    fi
-
-    git reset "$remote/$branch"
-
     if [ "$remote" = "origin" ]; then
+        if [ "$branch" = "" ]; then
+            branch="$(git remote show $remote | sed -n '/HEAD branch/s/.*: //p')"
+        fi
+
+        if [ "$(git branch --show-current)" != "$branch" ]; then
+            git switch -c "$branch"
+        fi
+
+        git reset "$remote/$branch"
+
         git branch --set-upstream-to $remote/$branch
     fi
 
@@ -65,8 +72,22 @@ if [ ! -f .gitremote ]; then
     exit 1
 fi
 
+# This loop is weird but needed. The file descriptor trick is required to keep
+# the script interactive inside the loop so read prompts can be used. The IFS=
+# ensures files without ending newlines are read correctly.
 
-cat .gitremote | while read line 
+# Open the file on file descriptor 3
+exec 3< .gitremote
+
+while IFS= read -r line <&3
 do
-    add_remote $line
+    # Skip empty lines and comments
+    if [ "$line" = "" ] || [ "${line:0:1}" = "#" ]; then
+        continue
+    fi
+
+    add_remote $(echo "$line" | envsubst)
 done
+
+# Close file descriptor 3
+exec 3<&-
