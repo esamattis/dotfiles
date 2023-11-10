@@ -39,7 +39,10 @@ add_remote() {
         fi
 
         git reset "$remote/$branch"
-        git branch --set-upstream-to $remote/$branch
+
+        if [ "$remote" = "origin" ]; then
+            git branch --set-upstream-to $remote/$branch
+        fi
     fi
 
 }
