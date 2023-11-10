@@ -2,15 +2,16 @@
 
 set -eu
 set -o pipefail
+remote_file=".gitremote"
 
 if [ "${1:-}" = "-h" ] || [  "${1:-}" = "--help" ]; then
     echo
-    echo "Reinitialize .git directory with remotes and branches from a .gitremote file"
+    echo "Reinitialize .git directory with remotes and branches from a $remote_file file"
     echo
-    echo "Line format in .gitremote file:"
+    echo "Line format in $remote_file file:"
     echo "    <remote-name> <remote-url> [branch]"
     echo
-    echo "Pass the values directly as arguments to skip the .gitremote file:"
+    echo "Pass the values directly as arguments to skip the $remote_file file:"
     echo "    git-reinitialize <remote> <url> [branch]"
     echo
     exit 0
@@ -56,21 +57,28 @@ add_remote() {
 
 }
 
-
-
-if [ ! -d .git ]; then
-    git init
-fi
-
-
 if [ "${1:-}" != "" ]; then
+    if [ ! -d .git ]; then
+        git init
+    fi
     add_remote $1 $2 ${3:-}
     exit 0
 fi
 
-if [ ! -f .gitremote ]; then
-    >&2 echo "No .gitremote file found"
-    exit 1
+while true; do
+    if [ "$PWD" = "/" ]; then
+        >&2 echo "No $remote_file file found"
+        exit 1
+    fi
+
+    if [ -f "$remote_file" ]; then
+        >&2 echo "Found $remote_file file from $PWD"
+        break;
+    fi
+done
+
+if [ ! -d .git ]; then
+    git init
 fi
 
 # This loop is weird but needed. The file descriptor trick is required to keep
@@ -78,8 +86,7 @@ fi
 # ensures files without ending newlines are read correctly.
 
 # Open the file on file descriptor 3
-exec 3< .gitremote
-
+exec 3< $remote_file 
 while IFS= read -r line <&3
 do
     # Skip empty lines and comments
