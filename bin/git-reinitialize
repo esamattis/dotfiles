@@ -76,10 +76,17 @@ while true; do
     fi
 
     if [ -f "$remote_file" ]; then
-        >&2 echo "Found $remote_file file from $PWD"
         break;
     fi
+
+    cd ..
 done
+
+>&2 echo "Found $remote_file file from $PWD"
+read -p "Reinitialize .git there? y/n> " -n1 reinitialize
+if [ "$reinitialize" != "y" ]; then
+    exit 1
+fi
 
 if [ ! -d .git ]; then
     git init
