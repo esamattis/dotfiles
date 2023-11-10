@@ -27,7 +27,6 @@ add_remote() {
 
     # if git has remote
     if git remote | grep -q "^$remote$"; then
-        git 
         >&2 git remote show "$remote"
         >&2 echo 
         >&2 echo 
