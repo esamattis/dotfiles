@@ -28,6 +28,7 @@ add_remote() {
 
         local option=
         read -p "delete? y/n> " -n1 option
+        echo
         if [ "$option" = "y" ]; then
             git remote remove "$remote"
         else
