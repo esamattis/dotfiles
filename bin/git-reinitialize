@@ -19,6 +19,8 @@ fi
 
 
 add_remote() {
+    >&2 echo "Adding remote $@"
+    
     local remote="$1"
     local url="$2"
     local branch="${3:-}"
@@ -37,7 +39,6 @@ add_remote() {
         fi
     fi
 
-    >&2 echo "Adding remote $remote from $url"
     git remote add "$remote" "$url"
     git fetch "$remote"
 
