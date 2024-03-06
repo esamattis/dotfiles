@@ -64,6 +64,12 @@ while true; do
                 break
             else
                 git commit -m "$commit_message"
+                echo "Amend commit? [y/n]"
+                read -n1 amend
+                if [ "$amend" = "y" ]; then
+                    git commit --amend
+                fi
+
                 break
             fi
         done
