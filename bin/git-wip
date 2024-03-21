@@ -2,6 +2,8 @@
 
 set -eu
 
+read -p "message> " message
+
 cd "$(git rev-parse --show-toplevel)"
 git add .
-git commit -m "[skip ci] WIP"
+git commit -m "[skip ci] WIP $message"
