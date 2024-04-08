@@ -73,3 +73,5 @@
 	defaultBranch = main
 [include]
   path = ~/.gitconfig.local
+[interactive]
+	diffFilter = diff-so-fancy --patch
