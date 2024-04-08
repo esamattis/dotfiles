@@ -43,6 +43,7 @@
   not-pushed = !git l ${1:-origin/master}..HEAD
   cached = diff --cached
   reset-upstream = !git reset --hard $(git rev-parse --abbrev-ref --symbolic-full-name @{u})
+  difft = difftool
 [push]
 	default = simple
 [gc]
@@ -50,11 +51,17 @@
 [core]
 	pager = diff-so-fancy | less --tabs=4 -RFX
 	excludesFile = ~/.gitignore
-[color "diff-highlight"]
-	oldNormal = red bold
-	oldHighlight = red bold 52
-	newNormal = green bold
-	newHighlight = green bold 22
+
+# https://difftastic.wilfred.me.uk/git.html#regular-usage
+[diff]
+	tool = difftastic
+[difftool]
+	prompt = false
+[difftool "difftastic"]
+	cmd = difft "$LOCAL" "$REMOTE"
+[pager]
+	difftool = true
+
 [url "https://"]
 	insteadOf = git://
 [grep]
