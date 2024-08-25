@@ -248,7 +248,7 @@ gwc() {
     return
   fi
 
-  git worktree add "$checkout_dir" "$branch" 
+  git worktree add "$checkout_dir" "$branch"
   cd "$checkout_dir"
 
   if [ -f pnpm-lock.yaml ] && [ ! -d node_modules ]; then
@@ -280,5 +280,3 @@ gwdestroy() {
   gwr
   git worktree remove "$worktree_path"
 }
-
-
