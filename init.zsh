@@ -2,6 +2,9 @@
 # https://stackoverflow.com/a/18814147/153718
 _esamatti_dotfiles_dir="${0:A:h}"
 
+# auto complete git-commands
+zstyle ':completion:*:*:git:*' user-commands ${${(M)${(k)commands}:#git-*}#git-}
+
 _esamatti_dotfiles_init() {
     local os="$(uname)"
     local prefix=
