@@ -13,3 +13,4 @@ ln -sf "$(pwd)/vim/vimrc" "$HOME/.config/nvim/init.vim"
 
 ln -sf "$(pwd)/git/gitconfig" "$HOME/.gitconfig"
 
+git config --global core.hooksPath "$(pwd)/git/hooks"

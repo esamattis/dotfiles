@@ -52,6 +52,7 @@
 [core]
 	pager = diff-so-fancy | less --tabs=4 -RFX
 	excludesFile = ~/.gitignore
+	hooksPath = /Users/esamatti/code/dotfiles/git/hooks
 
 # https://difftastic.wilfred.me.uk/git.html#regular-usage
 [diff]

@@ -1,6 +1,6 @@
 
 # https://stackoverflow.com/a/18814147/153718
-_esamatti_dotfiles_dir="${0:A:h}"
+export DOTFILES="${0:A:h}"
 
 # auto complete git-commands
 zstyle ':completion:*:*:git:*' user-commands ${${(M)${(k)commands}:#git-*}#git-}
@@ -34,7 +34,7 @@ _esamatti_dotfiles_init
 # not in path on macos?
 export PATH=/usr/local/bin:$PATH
 
-export PATH="${_esamatti_dotfiles_dir}/bin:$PATH"
+export PATH="${DOTFILES}/bin:$PATH"
 
 # random crap
 export PATH=$HOME/bin:$PATH

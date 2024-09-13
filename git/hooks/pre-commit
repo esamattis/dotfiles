@@ -1,0 +1,8 @@
+#!/bin/sh
+
+git diff-index --name-status --cached HEAD -- | cut -c3- | while read FILE; do
+    if git diff --cached "$FILE" | grep -q "NOCOMMIT"; then
+        echo $FILE ' contains a NOCOMMIT string!'
+        exit 1
+    fi
+done
