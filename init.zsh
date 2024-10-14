@@ -2,8 +2,6 @@
 # https://stackoverflow.com/a/18814147/153718
 export DOTFILES="${0:A:h}"
 
-# auto complete git-commands
-zstyle ':completion:*:*:git:*' user-commands ${${(M)${(k)commands}:#git-*}#git-}
 
 _esamatti_dotfiles_init() {
     local os="$(uname)"
@@ -30,6 +28,29 @@ _esamatti_dotfiles_init() {
 }
 
 _esamatti_dotfiles_init
+
+autoload -Uz compinit promptinit
+compinit
+promptinit
+
+if [ -f ~/code/fzf-tab/fzf-tab.plugin.zsh ]; then
+    source ~/code/fzf-tab/fzf-tab.plugin.zsh
+else
+    echo "fzf-tab plugin not found" >&2
+fi
+
+
+# auto complete git-commands
+zstyle ':completion:*:*:git:*' user-commands ${${(M)${(k)commands}:#git-*}#git-}
+
+compdef 'eval "$(rt --zsh-complete $LBUFFER $RBUFFER)"' rt
+
+export RTN_RUNNERS=scripts:node_modules/.bin
+compdef 'eval "$(rt --runners-env RTN_RUNNERS --zsh-complete $LBUFFER $RBUFFER)"' rtn
+rtn() {
+    rt --runners-env RTN_RUNNERS $@
+}
+
 
 # not in path on macos?
 export PATH=/usr/local/bin:$PATH
@@ -164,6 +185,19 @@ esamatti-fzf-find() {
 
 export FZF_DEFAULT_COMMAND=esamatti-fzf-find
 export FZF_CTRL_T_COMMAND=esamatti-fzf-find
+
+export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
+  --no-color
+'
+
+zstyle ':fzf-tab:*' fzf-flags --bind "tab:toggle,enter:accept"
+
+export EDITOR=nvim
+alias vim=nvim
+alias vi=nvim
+
+# Zed autocomplete with args does not work. This is a workaround.
+compdef _gnu_generic zed
 
 # fzf keybindings install:
 # $(brew --prefix)/opt/fzf/install
