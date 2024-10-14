@@ -1,0 +1,53 @@
+#!/bin/bash
+
+set -eu
+
+if [ "${1:-}" = "" ]; then
+    path="."
+    cd "$(git rev-parse --show-toplevel)"
+else
+    path="$1"
+fi
+
+# Add untracked files
+git ls-files --others --exclude-standard "$path" | xargs git add --intent-to-add
+
+# Interactive lines from modified and untracked files
+git add -p "$path"
+
+if [ "$(git diff --cached)" = "" ]; then
+    git reset HEAD "$path"
+    echo "Nothing to commit"
+    exit 1
+fi
+
+while true; do
+    >&2 echo
+    >&2 echo "Staged some changes for absorb. Now what?"
+    >&2 echo
+    >&2 echo "a = absorb (default)"
+    >&2 echo "d = show diff"
+    >&2 echo "s = leave staged"
+    >&2 echo "q = quit"
+    read -n1 option
+    >&2 echo
+
+    if [ "$option" = "a" ] || [ "$option" = "" ]; then
+        git absorb
+        git auto-rebase
+    elif [ "$option" = "d" ]; then
+        git diff --cached
+        continue
+    elif [ "$option" = "q" ]; then
+        break
+    elif [ "$option" = "s" ]; then
+        exit 0
+    else
+        continue
+    fi
+
+    break
+done
+
+# Clean any --intent-to-add files
+git reset HEAD "$path"
