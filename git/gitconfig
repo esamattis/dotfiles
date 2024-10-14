@@ -1,7 +1,7 @@
 [user]
   name = Esa-Matti Suuronen
   email = code@esamatti.fi
-	signingkey = /Users/esamatti/.ssh/id_ed25519.pub
+	signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINADNs54eoQH3TWBAnQSCa2rwPBYLOK9xsOXgkd3cZml
 [github]
   user = esamattis
 [apply]
@@ -79,3 +79,7 @@
 	diffFilter = diff-so-fancy --patch
 [gpg]
 	format = ssh
+[gpg "ssh"]
+	program = /Applications/1Password.app/Contents/MacOS/op-ssh-sign
+[commit]
+	gpgsign = true
