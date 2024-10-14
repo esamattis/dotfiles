@@ -168,21 +168,6 @@ zle -N esamattis-fasd-pick-dir
 # Use Ctrl+g to pick recently used directory
 bindkey '^G' esamattis-fasd-pick-dir
 
-esamatti-fzf-find() {
-    if git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
-        git ls-files
-        return
-    fi
-
-    if [ -x "$(command -v fd)" ]; then
-        fd --type f --strip-cwd-prefix
-        return
-    fi
-
-    echo "Not in a git repo" >&2
-    return 1
-}
-
 export FZF_DEFAULT_COMMAND=esamatti-fzf-find
 export FZF_CTRL_T_COMMAND=esamatti-fzf-find
 
