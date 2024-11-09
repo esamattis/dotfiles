@@ -2,6 +2,12 @@
 
 >&2 echo "Commiting as $(git config github.user)"
 
+if ! ssh-add -l >/dev/null; then
+    >&2 echo "No ssh identities. Cannot commit"
+    exit 1
+fi
+
+
 git diff-index --name-status --cached HEAD -- | cut -c3- | while read FILE; do
     if git diff --cached "$FILE" | grep -q "NOCOMMIT"; then
         echo $FILE ' contains a NOCOMMIT string!'
