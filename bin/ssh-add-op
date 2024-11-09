@@ -1,0 +1,15 @@
+#!/bin/sh
+
+set -eu
+
+export SSH_ASKPASS="$(which _ssh_askpass_op.sh)"
+export SSH_ASKPASS_REQUIRE=force
+
+if [ ! -x "$SSH_ASKPASS" ]; then
+    echo "Not executable $SSH_ASKPASS"
+fi
+
+
+key=$(ls -1 $HOME/.ssh/*.op | xargs -I% basename % .op  | fzf)
+
+exec ssh-add -t 12h "$HOME/.ssh/$key"
