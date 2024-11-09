@@ -54,7 +54,7 @@ while true; do
     >&2 echo "q = quit"
     >&2 echo
     >&2 echo "Commiting as $git_user"
-    read -n1 -p "?" option
+    read -n1 -p "?>" option
     >&2 echo
 
 
