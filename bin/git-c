@@ -74,7 +74,9 @@ while true; do
                 git commit
                 break
             else
+                set -x
                 git commit -m "$commit_message"
+                set +x
 
                 echo "Amend commit? [y/n]"
                 read -n1 amend
