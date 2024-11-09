@@ -48,6 +48,7 @@ while true; do
     >&2 echo "Staged some changes. Now what?"
     >&2 echo
     >&2 echo "c = commit"
+    >&2 echo "a = absorb"
     >&2 echo "d = show diff"
     >&2 echo "s = leave staged"
     >&2 echo "u = change user"
@@ -92,6 +93,10 @@ while true; do
     elif [ "$option" = "u" ]; then
         git user
         continue
+    elif [ "$option" = "a" ]; then
+        git absorb
+        git auto-rebase
+        break
     elif [ "$option" = "q" ]; then
         break
     elif [ "$option" = "s" ]; then
