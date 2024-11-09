@@ -44,7 +44,7 @@
 [gc]
 	auto = 0
 [core]
-	pager = diff-so-fancy | less --tabs=4 -RFX
+	pager = delta
 	excludesFile = ~/.gitignore
 	hooksPath = /Users/esamatti/code/dotfiles/git/hooks
 
@@ -70,10 +70,18 @@
 [include]
   path = ~/.gitconfig.local
 [interactive]
-	diffFilter = diff-so-fancy --patch
+	diffFilter =  delta --color-only
 [gpg]
 	format = ssh
 [commit]
 	gpgsign = true
+[delta]
+    navigate = true    # use n and N to move between diff sections
+
+    # delta detects terminal colors automatically; set one of these to disable auto-detection
+    # dark = true
+    # light = true
+[merge]
+    conflictstyle = zdiff3
 [include]
     path = ~/.gitconfig.local
