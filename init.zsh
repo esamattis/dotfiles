@@ -300,3 +300,66 @@ gwdestroy() {
   gwr
   git worktree remove "$worktree_path"
 }
+
+# Create a pull request against the current branch.
+# Generates a new local branch automatically, pushes it to github and open PR creation form.
+# Requires the GH CLI.
+gh-pr() {
+	if [ "$(git status --porcelain)" != "" ]; then
+		echo "Not clean git"
+		return 1
+	fi
+
+    local username="$(git config --global github.user || whoami)"
+	local title=
+
+    local commit_message="$(git log --format=%B -n 1 HEAD)"
+
+	if [ "${1}" = "" ]; then
+        echo
+        echo "Leave it empty to use \"$commit_message\""
+        echo
+		read "title?PR Title> "
+	else
+		title="${1}"
+	fi
+
+    if [ "$title" = "" ]; then
+        title="$commit_message"
+    fi
+
+    # Generate safe branch name
+	local branch="$(echo "$title" | head -c50 | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')"
+
+    local default_base="$(git rev-parse --abbrev-ref HEAD)"
+    local base=
+
+    echo
+    git branch --sort=committerdate | tail -n 10
+    echo
+    echo "Some recently used branches 👆"
+
+    echo
+    echo "Target remote branch for the PR. Set to empty to use '$default_base'"
+    read "base?Branch> "
+
+	if [ "$base" = "" ]; then
+		base="$default_base"
+	fi
+
+	git switch -c "$username/$branch"
+
+    read "rebase?rebase? y/n> "
+
+    if [ "$rebase" = "y" ]; then
+        git rebase -i "$base"
+    fi
+
+    # Prefix the remote branch with $(whoami)/ to avoid collisions
+	git push origin "$username/$branch:$username/$branch" -u
+	gh pr create --title "$title" --base $base --web
+
+    echo "$title" | pbcopy
+    echo
+    echo "The PR title has been copied to the clipboard"
+}
