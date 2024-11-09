@@ -2,6 +2,15 @@
 
 set -eu
 
+if ! ssh-add -l >/dev/null; then
+    >&2 echo "No ssh identities. Continue? [y/n] "
+
+    read -n1 cont
+    if [ "$cont" != "y" ]; then
+        exit 0
+    fi
+fi
+
 message=
 
 if [ "${1:-}" = "-m" ]; then
