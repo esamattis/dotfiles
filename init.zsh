@@ -33,11 +33,6 @@ autoload -Uz compinit promptinit
 compinit
 promptinit
 
-if [ -f ~/code/fzf-tab/fzf-tab.plugin.zsh ]; then
-    source ~/code/fzf-tab/fzf-tab.plugin.zsh
-else
-    echo "fzf-tab plugin not found" >&2
-fi
 
 
 # auto complete git-commands
@@ -100,9 +95,6 @@ setopt HIST_VERIFY               # Don't execute immediately upon history expans
 setopt HIST_BEEP                 # Beep when accessing nonexistent history.
 
 
-# Remove CWD dirs from fzf-z
-# https://github.com/andrewferrier/fzf-z#sources-of-information
-export FZFZ_SUBDIR_LIMIT=0
 
 export EDITOR=vim-clean
 
@@ -110,7 +102,6 @@ export EDITOR=vim-clean
 zstyle ':prompt:pure:prompt:success' color cyan
 zstyle ':prompt:pure:prompt:error' color red
 
-autoload -Uz compinit && compinit
 
 
 
@@ -168,6 +159,20 @@ zle -N esamattis-fasd-pick-dir
 # Use Ctrl+g to pick recently used directory
 bindkey '^G' esamattis-fasd-pick-dir
 
+# fzf keybindings install:
+source <(fzf --zsh)
+
+
+if [ -f ~/code/fzf-tab/fzf-tab.plugin.zsh ]; then
+    source ~/code/fzf-tab/fzf-tab.plugin.zsh
+else
+    echo "fzf-tab plugin not found" >&2
+fi
+
+# Remove CWD dirs from fzf-z
+# https://github.com/andrewferrier/fzf-z#sources-of-information
+export FZFZ_SUBDIR_LIMIT=0
+
 export FZF_DEFAULT_COMMAND=esamatti-fzf-find
 export FZF_CTRL_T_COMMAND=esamatti-fzf-find
 
@@ -184,10 +189,6 @@ alias vi=nvim
 # Zed autocomplete with args does not work. This is a workaround.
 compdef _gnu_generic zed
 
-# fzf keybindings install:
-# $(brew --prefix)/opt/fzf/install
-# https://github.com/junegunn/fzf#using-homebrew
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 
 
