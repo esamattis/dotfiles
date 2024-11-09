@@ -5,12 +5,8 @@ set -eu
 >&2 echo "Commiting as $(git config github.user)"
 
 if ! ssh-add -l >/dev/null; then
-    >&2 echo "No ssh identities. Continue? [y/n] "
-
-    read -n1 cont
-    if [ "$cont" != "y" ]; then
-        exit 0
-    fi
+    >&2 echo "No ssh identities. "
+    ssh-add-op
 fi
 
 message=
