@@ -1,9 +1,3 @@
-[user]
-  name = Esa-Matti Suuronen
-  email = code@esamatti.fi
-	signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINADNs54eoQH3TWBAnQSCa2rwPBYLOK9xsOXgkd3cZml
-[github]
-  user = esamattis
 [apply]
   whitespace = nowarn
 [color]
