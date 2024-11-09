@@ -1,0 +1,6 @@
+#!/bin/sh
+
+set -eu
+
+file=$(ls -1 ~/.gitinclude.d | fzf)
+cp "$HOME/.gitinclude.d/$file" "$HOME/.gitconfig.local"
