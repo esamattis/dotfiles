@@ -2,7 +2,6 @@
 
 set -eu
 
->&2 echo "Commiting as $(git config github.user)"
 
 if ! ssh-add -l >/dev/null; then
     >&2 echo "No ssh identities. "
@@ -44,14 +43,18 @@ if [ "${message:-}" != "" ]; then
 fi
 
 while true; do
+    git_user="$(git config github.user)"
     >&2 echo
     >&2 echo "Staged some changes. Now what?"
     >&2 echo
     >&2 echo "c = commit"
     >&2 echo "d = show diff"
     >&2 echo "s = leave staged"
+    >&2 echo "u = change user"
     >&2 echo "q = quit"
-    read -n1 option
+    >&2 echo
+    >&2 echo "Commiting as $git_user"
+    read -n1 -p "?" option
     >&2 echo
 
 
@@ -85,6 +88,9 @@ while true; do
         done
     elif [ "$option" = "d" ]; then
         git diff --cached
+        continue
+    elif [ "$option" = "u" ]; then
+        git user
         continue
     elif [ "$option" = "q" ]; then
         break
