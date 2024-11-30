@@ -10,6 +10,10 @@ if [ ! -x "$SSH_ASKPASS" ]; then
 fi
 
 
+if [ "${1:-}" = "-d" ]; then
+    ssh-add -D
+fi
+
 key=$(ls -1 $HOME/.ssh/*.op | xargs -I% basename % .op  | fzf)
 
 exec ssh-add -t 12h "$HOME/.ssh/$key"
