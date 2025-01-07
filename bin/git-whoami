@@ -1,0 +1,10 @@
+#!/bin/sh
+
+set -eu
+
+echo "== Git Identity =="
+echo "Git User Name:  $(git config --get user.name)"
+echo "Git User Email: $(git config --get user.email)"
+echo
+echo "== GitHub Authentication =="
+  echo "GitHub User:    $(git config --get github.user)"
