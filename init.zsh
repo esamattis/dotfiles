@@ -357,7 +357,8 @@ gh-pr() {
 
     # Prefix the remote branch with $(whoami)/ to avoid collisions
 	git push origin "$username/$branch:$username/$branch" -u
-	gh pr create --title "$title" --base $base --web
+	local gh_title="$(echo "$title" | sed 's/ /%20/g')"
+	gh pr create --title "$gh_title" --base $base --web
 
     echo "$title" | pbcopy
     echo
