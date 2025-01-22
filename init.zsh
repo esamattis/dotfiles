@@ -363,3 +363,9 @@ gh-pr() {
     echo
     echo "The PR title has been copied to the clipboard"
 }
+
+# Jump to a directory in $HOME/code using fzf
+p() {
+    local dir=$(ls -1 $HOME/code | fzf --header="Jump to project")
+    cd "$HOME/code/$dir"
+}
