@@ -56,4 +56,4 @@ else
     >&2 echo
 fi
 
-git rebase -i --autosquash --autostash "$branch"
+git rebase --allow-empty -i --autosquash --autostash "$branch"
