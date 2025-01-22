@@ -35,8 +35,6 @@ promptinit
 
 
 
-# auto complete git-commands
-zstyle ':completion:*:*:git:*' user-commands ${${(M)${(k)commands}:#git-*}#git-}
 
 compdef 'eval "$(rt --zsh-complete $LBUFFER $RBUFFER)"' rt
 
@@ -369,3 +367,6 @@ p() {
     local dir=$(ls -1 $HOME/code | fzf --header="Jump to project")
     cd "$HOME/code/$dir"
 }
+
+# auto complete git-commands
+zstyle ':completion:*:*:git:*' user-commands ${${(M)${(k)commands}:#git-*}#git-}
