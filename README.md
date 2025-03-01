@@ -29,4 +29,7 @@ brew install smudge/smudge/nightlight
 brew install gh
 brew install pure
 brew install neovim
+brew install fd
+brew install sevenzip
+brew install yazi
 ```
