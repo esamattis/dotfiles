@@ -404,5 +404,11 @@ zle -N __esamatti_yazi
 bindkey ^f __esamatti_yazi
 
 alias cd-yazi='__esamatti_yazi --cd'
+
+cd-fzf() {
+    cd "$(fd -t d | fzf)"
+
+}
+
 # auto complete git-commands
 zstyle ':completion:*:*:git:*' user-commands ${${(M)${(k)commands}:#git-*}#git-}
