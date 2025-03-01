@@ -368,5 +368,41 @@ p() {
     cd "$HOME/code/$dir"
 }
 
+__esamatti_yazi() {
+    local arg="$1"
+    local file=/tmp/zsh-yazi.txt
+
+    while true; do
+        rm -f "$file"
+
+        # workaround for https://github.com/sxyazi/yazi/issues/2278#issuecomment-2629352138
+        yazi --chooser-file "$file"  < /dev/tty
+
+        if [ ! -f "$file" ]; then
+            return
+        fi
+
+        local selected="$(cat "$file")"
+
+        if [ "$arg" = "--cd" ]; then
+            if [ -d "$selected" ]; then
+                cd "$selected"
+            else
+                cd "$(dirname "$selected")"
+            fi
+            return
+        fi
+
+        BUFFER+="$selected"
+        zle reset-prompt
+        return
+    done
+}
+
+
+zle -N __esamatti_yazi
+bindkey ^f __esamatti_yazi
+
+alias cd-yazi='__esamatti_yazi --cd'
 # auto complete git-commands
 zstyle ':completion:*:*:git:*' user-commands ${${(M)${(k)commands}:#git-*}#git-}
