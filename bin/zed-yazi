@@ -1,0 +1,32 @@
+#!/bin/sh
+
+set -eu
+
+
+file=/tmp/yazi-zed.txt
+
+if [ "${ZED_DIRNAME:-}" != "" ]; then
+    cd "$ZED_DIRNAME"
+fi
+
+
+while true; do
+    rm -f "$file"
+    yazi --chooser-file "$file"
+
+    if [ ! -f "$file" ]; then
+        exit
+    fi
+
+    selected="$(cat "$file")"
+    if [ -d "$selected" ]; then
+        cd "$selected"
+        continue
+    fi
+
+    if [ -f "$selected" ]; then
+        break
+    fi
+done
+
+zed "$selected"
