@@ -311,7 +311,7 @@ gh-pr() {
     local username="$(git config --global github.user || whoami)"
 	local title=
 
-    local commit_message="$(git log --format=%B -n 1 HEAD)"
+    local commit_message="$(git log --format=%B -n 1 HEAD | head -n 1)"
 
 	if [ "${1}" = "" ]; then
         echo
@@ -326,8 +326,18 @@ gh-pr() {
         title="$commit_message"
     fi
 
-    # Generate safe branch name
-	local branch="$(echo "$title" | head -c50 | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')"
+    # Prompt for the branch name
+    local branch_prompt=
+    echo
+    echo "Enter branch name (leave empty to generate from title)"
+    read "branch_prompt?Branch name> "
+
+    # Generate safe branch name from title if no branch name was provided
+    if [ "$branch_prompt" = "" ]; then
+        local branch="$(echo "$title" | head -c50 | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')"
+    else
+        local branch="$(echo "$branch_prompt" | head -c50 | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')"
+    fi
 
     local default_base="$(git rev-parse --abbrev-ref HEAD)"
     local base=
