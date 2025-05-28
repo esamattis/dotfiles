@@ -2,8 +2,30 @@
 
 set -eu
 
+
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
+  echo "Usage: $0 <-S> <message>"
+  echo "  -S: Skip CI"
+  exit 1
+fi
+
 read -p "message> " message
 
-cd "$(git rev-parse --show-toplevel)"
-git add .
-git commit -m "[skip ci] WIP $message"
+if [ "${1:-}" = "-S" ]; then
+  shift
+  message="WIP $message"
+else
+  message="[skip ci] WIP $message"
+fi
+
+
+if [ "$#" -eq 0 ]; then
+    set -x
+    cd "$(git rev-parse --show-toplevel)"
+    git add .
+else
+    set -x
+    git add "$@"
+fi
+
+git commit -m "$message"
