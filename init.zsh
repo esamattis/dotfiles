@@ -174,9 +174,10 @@ export FZFZ_SUBDIR_LIMIT=0
 export FZF_DEFAULT_COMMAND=esamatti-fzf-find
 export FZF_CTRL_T_COMMAND=esamatti-fzf-find
 
-export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
-  --no-color
-'
+# export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
+#   --no-color
+# '
+# export FZF_DEFAULT_OPTS=""
 
 zstyle ':fzf-tab:*' fzf-flags --bind "tab:toggle,enter:accept"
 
