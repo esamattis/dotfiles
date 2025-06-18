@@ -1,0 +1,48 @@
+#!/bin/bash
+
+set -eu
+set -o pipefail
+
+# Check if gh CLI is available and we're in a PR
+if ! command -v gh &> /dev/null; then
+    echo "Error: gh CLI is not installed" >&2
+    exit 1
+fi
+
+if ! gh pr view &>/dev/null; then
+    echo "Error: Not in a PR or gh CLI not authenticated" >&2
+    exit 1
+fi
+
+# Get the PR base branch
+gh_pr_branch="origin/$(gh pr view --json baseRefName -q .baseRefName)"
+
+if [ "$gh_pr_branch" = "" ]; then
+    echo "Error: Could not determine PR base branch" >&2
+    exit 1
+fi
+
+# Get the first commit of the PR
+first_pr_commit="$(git log "--pretty=format:%H" ${gh_pr_branch}...HEAD --reverse | awk 'NR==1{print $1}')"
+
+if [ "$first_pr_commit" = "" ]; then
+    echo "Error: Could not find first PR commit" >&2
+    exit 1
+fi
+
+echo "About to reset to first PR commit:"
+echo "  Commit: $(git log "--pretty=format:%h %s" $first_pr_commit -1)"
+echo "  PR base branch: $gh_pr_branch"
+echo
+echo "This will reset your branch to this commit, keeping working directory changes."
+echo -n "Continue? (y/N): "
+read -r response
+
+if [[ "$response" =~ ^[Yy]$ ]]; then
+    echo "Performing reset..."
+    git reset "$first_pr_commit"
+    echo "Reset complete."
+else
+    echo "Reset cancelled."
+    exit 1
+fi
