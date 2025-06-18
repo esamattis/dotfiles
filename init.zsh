@@ -309,7 +309,7 @@ gh-pr() {
 		return 1
 	fi
 
-    local username="$(git config --global github.user || whoami)"
+    local username="$(git config github.user || whoami)"
 	local title=
 
     local commit_message="$(git log --format=%B -n 1 HEAD | head -n 1)"
@@ -327,17 +327,23 @@ gh-pr() {
         title="$commit_message"
     fi
 
-    # Prompt for the branch name
-    local branch_prompt=
-    echo
-    echo "Enter branch name (leave empty to generate from title)"
-    read "branch_prompt?Branch name> "
+    read "new_local_branch?Create new local branch? Y/n> "
 
-    # Generate safe branch name from title if no branch name was provided
-    if [ "$branch_prompt" = "" ]; then
-        local branch="$(echo "$title" | head -c50 | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')"
-    else
-        local branch="$(echo "$branch_prompt" | head -c50 | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')"
+    if [[ "$new_local_branch" =~ ^[Yy] || "$new_local_branch" = "" ]]; then
+        # Prompt for the branch name
+        local branch_prompt=
+        echo
+        echo "Enter branch name (leave empty to generate from title)"
+        read "branch_prompt?Branch name> "
+
+        # Generate safe branch name from title if no branch name was provided
+        if [ "$branch_prompt" = "" ]; then
+            local branch="$username/$(echo "$title" | head -c50 | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')"
+        else
+            local branch="$username/$(echo "$branch_prompt" | head -c50 | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')"
+        fi
+
+        git switch -c "$branch"
     fi
 
     local default_base="$(git rev-parse --abbrev-ref HEAD)"
@@ -356,8 +362,6 @@ gh-pr() {
 		base="$default_base"
 	fi
 
-	git switch -c "$username/$branch"
-
     read "rebase?rebase? y/n> "
 
     if [ "$rebase" = "y" ]; then
@@ -365,7 +369,7 @@ gh-pr() {
     fi
 
     # Prefix the remote branch with $(whoami)/ to avoid collisions
-	git push origin "$username/$branch:$username/$branch" -u
+	git push origin "$branch:$branch" -u
 	gh pr create --title "$title" --base $base --web
 
     echo "$title" | pbcopy
