@@ -420,6 +420,11 @@ bindkey ^f __esamatti_yazi
 
 alias cd-yazi='__esamatti_yazi --cd'
 
+git-wat() {
+    git standup -A "$1 00:00:00" -B "$1 23:59:59" -D local
+    # git standup -A "22-05-2025 00:00:00" -B "22-05-2025 23:59:59" -D local
+}
+
 cd-fzf() {
     cd "$(fd -t d | fzf)"
 
