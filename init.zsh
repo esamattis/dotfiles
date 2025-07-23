@@ -313,6 +313,7 @@ gh-pr() {
 	local title=
 
     local commit_message="$(git log --format=%B -n 1 HEAD | head -n 1)"
+    local default_base="$(git rev-parse --abbrev-ref HEAD)"
 
 	if [ "${1}" = "" ]; then
         echo
@@ -346,7 +347,6 @@ gh-pr() {
         git switch -c "$branch"
     fi
 
-    local default_base="$(git rev-parse --abbrev-ref HEAD)"
     local base=
 
     echo
