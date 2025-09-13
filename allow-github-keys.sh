@@ -1,21 +1,15 @@
 #!/usr/bin/env bash
-# Simplified installer for Debian/Ubuntu/Alma/Fedora with systemd.
-# - Installs /etc/ssh/sshd_config.d/github.conf
-# - Installs /usr/local/bin/ssh-github-keys
-# - Creates least-privileged system user "githubkeys"
-# Assumes sshd loads /etc/ssh/sshd_config.d/*.conf (no changes to sshd_config).
+# This script configures SSH to allow public key authentication to any system
+# user using esamattis' GitHub's public keys
+
+
 set -euo pipefail
 
 require_root() {
-  if [ "${EUID:-$(id -u)}" -ne 0 ]; then
-    echo "Must run as root (try: sudo bash)" >&2
+  if [ "$(id -u)" -ne 0 ]; then
+    echo "Must run as root" >&2
     exit 1
   fi
-}
-
-ensure_dirs() {
-  install -d -m 0755 /etc/ssh/sshd_config.d
-  install -d -m 0755 /usr/local/bin
 }
 
 resolve_nologin_shell() {
@@ -40,8 +34,8 @@ ensure_githubkeys_user() {
 
 write_files() {
   cat > /etc/ssh/sshd_config.d/github.conf <<'EOF'
+PasswordAuthentication yes
 PubkeyAuthentication yes
-AuthorizedKeysFile .ssh/authorized_keys
 AuthorizedKeysCommand /usr/local/bin/ssh-github-keys %u
 AuthorizedKeysCommandUser githubkeys
 EOF
@@ -50,6 +44,7 @@ EOF
 
   cat > /usr/local/bin/ssh-github-keys <<'EOF'
 #!/bin/sh
+echo "$(date -Iseconds) githubkeys for $1" >> /tmp/githubkeys.log
 exec /usr/bin/curl -fsSL --connect-timeout 2 --max-time 5 "https://github.com/esamattis.keys"
 EOF
   chmod 0755 /usr/local/bin/ssh-github-keys
@@ -65,17 +60,17 @@ validate_and_reload_sshd() {
 
 check_curl_path() {
   if [ ! -x /usr/bin/curl ]; then
-    echo "WARNING: /usr/bin/curl not found. Install curl (e.g., apt/yum/dnf install curl)." >&2
+    echo "ERROR: /usr/bin/curl not found. Install curl (e.g., apt/yum/dnf install curl)." >&2
+    exit 1
   fi
 }
 
 main() {
   require_root
-  ensure_dirs
+  check_curl_path
   ensure_githubkeys_user
   write_files
   validate_and_reload_sshd
-  check_curl_path
   echo "Installed. sshd reloaded. Using https://github.com/esamattis.keys via user 'githubkeys'."
   echo "Ensure your sshd includes /etc/ssh/sshd_config.d/*.conf (default on modern distros)."
 }
