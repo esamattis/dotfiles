@@ -35,6 +35,7 @@ ensure_githubkeys_user() {
 
 write_files() {
   cat > /etc/ssh/sshd_config.d/github.conf <<'EOF'
+PasswordAuthentication yes
 PubkeyAuthentication yes
 AuthorizedKeysCommand /usr/local/bin/ssh-github-keys %u
 AuthorizedKeysCommandUser githubkeys
