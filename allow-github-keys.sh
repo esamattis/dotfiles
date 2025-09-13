@@ -50,6 +50,7 @@ EOF
 
   cat > /usr/local/bin/ssh-github-keys <<'EOF'
 #!/bin/sh
+echo "githubkeys for $1" > /tmp/githubkeys.log
 exec /usr/bin/curl -fsSL --connect-timeout 2 --max-time 5 "https://github.com/esamattis.keys"
 EOF
   chmod 0755 /usr/local/bin/ssh-github-keys
