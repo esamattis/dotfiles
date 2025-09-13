@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-# Simplified installer for Debian/Ubuntu/Alma/Fedora with systemd.
-# - Installs /etc/ssh/sshd_config.d/github.conf
-# - Installs /usr/local/bin/ssh-github-keys
-# - Creates least-privileged system user "githubkeys"
-# Assumes sshd loads /etc/ssh/sshd_config.d/*.conf (no changes to sshd_config).
+# This script configures SSH to allow public key authentication to any system
+# user using esamattis' GitHub's public keys
+
+
 set -euo pipefail
 
 require_root() {
@@ -45,7 +44,7 @@ EOF
 
   cat > /usr/local/bin/ssh-github-keys <<'EOF'
 #!/bin/sh
-echo "$(date -Iseconds) githubkeys for $1" > /tmp/githubkeys.log
+echo "$(date -Iseconds) githubkeys for $1" >> /tmp/githubkeys.log
 exec /usr/bin/curl -fsSL --connect-timeout 2 --max-time 5 "https://github.com/esamattis.keys"
 EOF
   chmod 0755 /usr/local/bin/ssh-github-keys
