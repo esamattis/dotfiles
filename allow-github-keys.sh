@@ -61,16 +61,17 @@ validate_and_reload_sshd() {
 
 check_curl_path() {
   if [ ! -x /usr/bin/curl ]; then
-    echo "WARNING: /usr/bin/curl not found. Install curl (e.g., apt/yum/dnf install curl)." >&2
+    echo "ERROR: /usr/bin/curl not found. Install curl (e.g., apt/yum/dnf install curl)." >&2
+    exit 1
   fi
 }
 
 main() {
   require_root
+  check_curl_path
   ensure_githubkeys_user
   write_files
   validate_and_reload_sshd
-  check_curl_path
   echo "Installed. sshd reloaded. Using https://github.com/esamattis.keys via user 'githubkeys'."
   echo "Ensure your sshd includes /etc/ssh/sshd_config.d/*.conf (default on modern distros)."
 }
