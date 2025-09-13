@@ -7,15 +7,10 @@
 set -euo pipefail
 
 require_root() {
-  if [ "${EUID:-$(id -u)}" -ne 0 ]; then
-    echo "Must run as root (try: sudo bash)" >&2
+  if [ "$(id -u)" -ne 0 ]; then
+    echo "Must run as root" >&2
     exit 1
   fi
-}
-
-ensure_dirs() {
-  install -d -m 0755 /etc/ssh/sshd_config.d
-  install -d -m 0755 /usr/local/bin
 }
 
 resolve_nologin_shell() {
@@ -41,7 +36,6 @@ ensure_githubkeys_user() {
 write_files() {
   cat > /etc/ssh/sshd_config.d/github.conf <<'EOF'
 PubkeyAuthentication yes
-AuthorizedKeysFile .ssh/authorized_keys
 AuthorizedKeysCommand /usr/local/bin/ssh-github-keys %u
 AuthorizedKeysCommandUser githubkeys
 EOF
@@ -72,7 +66,6 @@ check_curl_path() {
 
 main() {
   require_root
-  ensure_dirs
   ensure_githubkeys_user
   write_files
   validate_and_reload_sshd
