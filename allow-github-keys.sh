@@ -66,7 +66,7 @@ validate_and_reload_sshd() {
 check_curl_path() {
   if [ ! -x /usr/bin/curl ]; then
     echo "WARNING: /usr/bin/curl not found. Install curl (e.g., apt/yum/dnf install curl)." >&2
-  }
+  fi
 }
 
 main() {

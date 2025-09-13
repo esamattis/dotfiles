@@ -33,3 +33,10 @@ brew install fd
 brew install sevenzip
 brew install yazi
 ```
+
+
+## Allow SSH access
+
+```
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/esamattis/dotfiles/refs/heads/main/allow-github-keys.sh)"
+```
