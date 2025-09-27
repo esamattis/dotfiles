@@ -26,8 +26,12 @@ if [ "$rand" = "" ]; then
 fi
 
 prefix=${1:-tmp}
-username="$(git config --global github.user || whoami)"
-branch="$prefix/$username/$rand/$(date +"%Y-%m-%d")"
+username="$(git config github.user || whoami)"
+branch="$prefix-$username-$rand-$(date +"%Y-%m-%d")"
 
+
+
+set -x
 git switch -c "$branch"
+set +x
 echo "$(date +"%Y-%m-%d %H:%M") $branch" >> "$(git rev-parse --show-toplevel)/.git/random-branch-history.log"
