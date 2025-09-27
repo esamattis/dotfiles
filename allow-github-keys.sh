@@ -33,6 +33,10 @@ ensure_githubkeys_user() {
 }
 
 write_files() {
+  # https://askubuntu.com/a/1110835
+  mkdir /var/run/sshd
+  chmod 0755 /var/run/sshd
+
   cat > /etc/ssh/sshd_config.d/github.conf <<'EOF'
 PasswordAuthentication yes
 PubkeyAuthentication yes
