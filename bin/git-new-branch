@@ -1,0 +1,70 @@
+#!/bin/sh
+
+set -eu
+
+if [ "${1-}" = "-h" ] || [ "${1-}" = "--help" ]; then
+    >&2 echo "git subcommand for local random branch generation"
+    >&2 echo "usage: git random-branch -b <base>"
+    exit 0
+fi
+
+
+base_branch=
+
+if [ "${1-}" = "-b" ] ; then
+    shift
+    if [ $# -eq 0 ]; then
+        >&2 echo "missing base branch after -b"
+        exit 1
+    fi
+    base_branch="$1"
+    if [ ! -z "$(git status --porcelain)" ]; then
+        >&2 echo "Working tree is dirty; please commit, stash, or clean before using -b option"
+        exit 1
+    fi
+    shift
+else
+    printf "Use origin/main as base (m) or current HEAD (c)? [m/c]> "
+    read choice
+    case "${choice}" in
+        m|M)
+
+            base_branch="origin/main"
+            ;;
+        c|C|"")
+            # current HEAD; leave base_branch empty
+            ;;
+        *)
+            >&2 echo "invalid choice: ${choice}"
+            exit 1
+            ;;
+    esac
+fi
+
+slug=""
+read -p 'slug> ' slug
+
+if [ "$slug" != "" ]; then
+    slug="$(echo "$slug" | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')"
+fi
+
+
+username="$(git config github.user || whoami)"
+
+if [ "$slug" != "" ]; then
+    branch="$username-$slug-$(date +"%Y-%m-%d")"
+else
+    branch="$username-$(date +"%Y-%m-%d-%H-%M-%S")"
+fi
+
+set -x
+git switch -c "$branch"
+set +x
+
+if [ "$base_branch" != "" ]; then
+    set -x
+    git reset --hard "$base_branch"
+    set +x
+fi
+
+echo "$(date +"%Y-%m-%d %H:%M") $branch" >> "$(git rev-parse --show-toplevel)/.git/random-branch-history.log"
