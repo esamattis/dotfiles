@@ -35,10 +35,6 @@ ensure_githubkeys_user() {
 }
 
 write_files() {
-  # https://askubuntu.com/a/1110835
-  mkdir /var/run/sshd
-  chmod 0755 /var/run/sshd
-
   cat > /etc/ssh/sshd_config.d/github.conf <<'EOF'
 PasswordAuthentication yes
 PubkeyAuthentication yes
@@ -69,9 +65,15 @@ check_curl_path() {
 
 keys() {
     exec 2>> /githubkeys/stderr
-    echo "Attempt for $SSH_USER" >&2
+    echo "#######################" >&2
+    echo "# Attempt for $SSH_USER" >&2
+    echo "# at $(date -u +"%Y-%m-%dT%H:%M:%SZ")" >&2
+    echo "#######################" >&2
     echo "Fetching GitHub keys for esamattis..." >&2
     curl -v --connect-timeout 2 --max-time 5 "https://github.com/esamattis.keys" -o /githubkeys/next.keys || {
+        echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >&2
+        echo "ERROR: Failed to fetch keys from GitHub" >&2
+        echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >&2
         cat /githubkeys/current.keys
         exit 0
     }
