@@ -96,6 +96,13 @@ if [ "${1:-}" = "keys" ]; then
   SSH_USER="${2:-}"
   keys
   exit 0
-elif [  "${1:-}" = "install" ]; then
-    install "$@"
 fi
+
+echo "This will configure SSH to allow public key authentication using esamattis' GitHub keys."
+read -p "Are you sure you want to continue? (y/N): " -r
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "Installation cancelled."
+    exit 0
+fi
+
+install "$@"
