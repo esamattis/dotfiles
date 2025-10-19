@@ -29,6 +29,8 @@ ensure_githubkeys_user() {
       --user-group \
       githubkeys
     passwd -l githubkeys >/dev/null 2>&1 || true
+    mkdir -p /githubkeys
+    chown githubkeys:githubkeys /githubkeys
   fi
 }
 
@@ -40,17 +42,13 @@ write_files() {
   cat > /etc/ssh/sshd_config.d/github.conf <<'EOF'
 PasswordAuthentication yes
 PubkeyAuthentication yes
-AuthorizedKeysCommand /usr/local/bin/ssh-github-keys %u
+AuthorizedKeysCommand /usr/local/bin/ssh-github-keys keys %u
 AuthorizedKeysCommandUser githubkeys
 EOF
   chmod 0644 /etc/ssh/sshd_config.d/github.conf
   chown root:root /etc/ssh/sshd_config.d/github.conf
 
-  cat > /usr/local/bin/ssh-github-keys <<'EOF'
-#!/bin/sh
-echo "$(date -Iseconds) githubkeys for $1" >> /tmp/githubkeys.log
-exec /usr/bin/curl -fsSL --connect-timeout 2 --max-time 5 "https://github.com/esamattis.keys"
-EOF
+  curl https://raw.githubusercontent.com/esamattis/dotfiles/refs/heads/main/allow-github-keys.sh -o /usr/local/bin/ssh-github-keys
   chmod 0755 /usr/local/bin/ssh-github-keys
   chown root:root /usr/local/bin/ssh-github-keys
 }
@@ -69,7 +67,20 @@ check_curl_path() {
   fi
 }
 
-main() {
+keys() {
+    exec 2>> /githubkeys/stderr
+    echo "Attempt for $SSH_USER" >&2
+    echo "Fetching GitHub keys for esamattis..." >&2
+    curl -v --connect-timeout 2 --max-time 5 "https://github.com/esamattis.keys" -o /githubkeys/next.keys || {
+        cat /githubkeys/current.keys
+        exit 0
+    }
+
+    mv /githubkeys/next.keys /githubkeys/current.keys
+    cat /githubkeys/current.keys
+}
+
+install() {
   require_root
   check_curl_path
   ensure_githubkeys_user
@@ -79,4 +90,10 @@ main() {
   echo "Ensure your sshd includes /etc/ssh/sshd_config.d/*.conf (default on modern distros)."
 }
 
-main "$@"
+if [ "${1:-}" = "keys" ]; then
+  SSH_USER="${2:-}"
+  keys
+  exit 0
+elif [  "${1:-}" = "install" ]; then
+    install "$@"
+fi
