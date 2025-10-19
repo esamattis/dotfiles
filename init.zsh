@@ -419,6 +419,18 @@ zle -N __esamatti_yazi
 bindkey ^f __esamatti_yazi
 
 alias cd-yazi='__esamatti_yazi --cd'
+alias x='chmod +x'
+
+# https://news.ycombinator.com/item?id=11071754
+alias config='/usr/bin/git --git-dir=$HOME/.myconf/ --work-tree=$HOME'
+# git init --bare $HOME/.myconf
+# config config status.showUntrackedFiles no
+
+config-git() {
+   export GIT_DIR=$HOME/.myconf
+   export GIT_WORK_TREE=$HOME
+}
+
 
 git-wat() {
     git standup -A "$1 00:00:00" -B "$1 23:59:59" -D local
