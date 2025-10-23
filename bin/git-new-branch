@@ -3,7 +3,7 @@
 set -eu
 
 if [ "${1-}" = "-h" ] || [ "${1-}" = "--help" ]; then
-    >&2 echo "git subcommand for local random branch generation"
+    >&2 echo "git subcommand to create a new branch with a unique name"
     >&2 echo "usage: git random-branch -b <base>"
     exit 0
 fi
@@ -24,7 +24,10 @@ if [ "${1-}" = "-b" ] ; then
     fi
     shift
 else
-    printf "Use origin/main as base (m) or current HEAD (c)? [m/c]> "
+    echo "Select base branch:"
+    echo "  m) origin/main"
+    echo "  c) current HEAD (default)"
+    printf "> "
     read choice
     case "${choice}" in
         m|M)
@@ -46,16 +49,14 @@ read -p 'slug> ' slug
 
 if [ "$slug" != "" ]; then
     slug="$(echo "$slug" | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')"
+else if [ "$base_branch" = "origin/main" ]; then
+    slug="main"
+else
+    slug="$(git rev-parse --abbrev-ref HEAD | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')"
 fi
-
 
 username="$(git config github.user || whoami)"
-
-if [ "$slug" != "" ]; then
-    branch="$username-$slug-$(date +"%Y-%m-%d")"
-else
-    branch="$username-$(date +"%Y-%m-%d-%H-%M-%S")"
-fi
+branch="$username-$slug-$(date +"%Y-%m-%d-%H-%M-%S")"
 
 set -x
 git switch -c "$branch"
