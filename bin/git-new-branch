@@ -24,7 +24,8 @@ else
     echo "  m) origin/main"
     echo "  c) current HEAD (default)"
     printf "> "
-    read choice
+    read -n 1 choice
+    echo
     case "${choice}" in
         m|M)
 
