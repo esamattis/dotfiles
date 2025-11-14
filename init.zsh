@@ -329,9 +329,9 @@ gh-pr() {
         title="$commit_message"
     fi
 
-    read "new_local_branch?Create new local branch? Y/n> "
+    read "branch_action?Branch action (n=new, r=rename, s=skip)> "
 
-    if [[ "$new_local_branch" =~ ^[Yy] || "$new_local_branch" = "" ]]; then
+    if [[ "$branch_action" = "n" ]]; then
         # Prompt for the branch name
         local branch_prompt=
         echo
@@ -346,6 +346,21 @@ gh-pr() {
         fi
 
         git switch -c "$branch"
+    elif [[ "$branch_action" = "r" ]]; then
+        # Prompt for the new branch name
+        local branch_prompt=
+        echo
+        echo "Enter new branch name (leave empty to generate from title)"
+        read "branch_prompt?Branch name> "
+
+        # Generate safe branch name from title if no branch name was provided
+        if [ "$branch_prompt" = "" ]; then
+            local branch="$username/$(echo "$title" | head -c50 | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')"
+        else
+            local branch="$username/$(echo "$branch_prompt" | head -c50 | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')"
+        fi
+
+        git branch -m "$branch"
     fi
 
     local base=
@@ -357,7 +372,7 @@ gh-pr() {
 
     echo
     echo "Target remote branch for the PR. Set to empty to use '$default_base'"
-    read "base?Branch> "
+    read "base?Target> "
 
 	if [ "$base" = "" ]; then
 		base="$default_base"
