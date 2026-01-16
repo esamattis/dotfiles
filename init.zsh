@@ -35,14 +35,14 @@ promptinit
 
 
 
-
-compdef 'eval "$(rt --zsh-complete $LBUFFER $RBUFFER)"' rt
-
-export RTN_RUNNERS=scripts:node_modules/.bin
-compdef 'eval "$(rt --runners-env RTN_RUNNERS --zsh-complete $LBUFFER $RBUFFER)"' rtn
-rtn() {
-    rt --runners-env RTN_RUNNERS $@
-}
+if [ -x "$(command -v rt)" ]; then
+    compdef 'eval "$(rt --zsh-complete $LBUFFER $RBUFFER)"' rt
+    export RTN_RUNNERS=scripts:node_modules/.bin
+    compdef 'eval "$(rt --runners-env RTN_RUNNERS --zsh-complete $LBUFFER $RBUFFER)"' rtn
+    rtn() {
+        rt --runners-env RTN_RUNNERS $@
+    }
+fi
 
 
 # not in path on macos?
