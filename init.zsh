@@ -458,5 +458,18 @@ cd-fzf() {
 
 }
 
+oc-commit() {
+    opencode run --model github-copilot/claude-sonnet-4.5 --message "Read the git local changes and make one or multiple git commits from it"
+}
+
+oc-fix-clippy() {
+    cargo clippy --fix
+    local clippy_exit=$?
+    if [ $clippy_exit -ne 0 ]; then
+        opencode run --model github-copilot/claude-sonnet-4.5 --message "Check and fix clippy warnings in the code. Also run cargo fmt"
+    fi
+    cargo fmt --all
+}
+
 # auto complete git-commands
 zstyle ':completion:*:*:git:*' user-commands ${${(M)${(k)commands}:#git-*}#git-}
