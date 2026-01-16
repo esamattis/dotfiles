@@ -2,6 +2,7 @@
 # https://stackoverflow.com/a/18814147/153718
 export DOTFILES="${0:A:h}"
 
+has_pure=
 
 _esamatti_dotfiles_init() {
     local os="$(uname)"
@@ -18,7 +19,11 @@ _esamatti_dotfiles_init() {
         # https://github.com/sindresorhus/pure
         if [ -f "${prefix}/share/zsh/site-functions/prompt_pure_setup"  ]; then
             source  "${prefix}/share/zsh/site-functions/prompt_pure_setup"
+            has_pure=1
         fi
+    elif [ -d "$HOME/.zsh/pure" ]; then
+      fpath+=($HOME/.zsh/pure)
+      has_pure=1
     fi
 
     if [ "$os" != "Darwin" ] && [ -x "$(command -v keychain)" ]; then
@@ -32,6 +37,10 @@ _esamatti_dotfiles_init
 autoload -Uz compinit promptinit
 compinit
 promptinit
+
+if [ "$has_pure" = "1" ]; then
+  prompt pure
+fi
 
 
 
