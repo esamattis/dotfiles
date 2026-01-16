@@ -46,7 +46,7 @@
 [core]
 	pager = delta
 	excludesFile = ~/.gitignore
-	hooksPath = /Users/esamatti/code/dotfiles/git/hooks
+	hooksPath = /home/esamatti/code/dotfiles/git/hooks
 
 # https://difftastic.wilfred.me.uk/git.html#regular-usage
 [diff]
@@ -71,10 +71,10 @@
   path = ~/.gitconfig.local
 [interactive]
 	diffFilter =  delta --color-only
-[gpg]
-	format = ssh
-[commit]
-	gpgsign = true
+; [gpg]
+; format = ssh
+; [commit]
+; 	gpgsign = true
 [delta]
     navigate = true    # use n and N to move between diff sections
 
@@ -85,3 +85,6 @@
     conflictstyle = zdiff3
 [include]
     path = ~/.gitconfig.local
+[user]
+	email = code@esamatti.fi
+	name = Esa-Matti Suuronen
