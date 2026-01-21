@@ -2,17 +2,24 @@
 
 set -eu
 
-dir="${1:-.}"
+dir="${1:-}"
 
+# When a directory argument is given, always use fd (not git ls-files)
+# because git ls-files only shows tracked files
+if [ -n "$dir" ]; then
+    if [ -x "$(command -v fd)" ]; then
+        exec fd --type f . "$dir"
+    fi
+    exec find "$dir" -type f
+fi
+
+# No directory argument - use git ls-files if in a git repo
 if git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
-    # git ls-files outputs paths relative to repo root, but with a prefix it works correctly
-    exec git ls-files -- "$dir"
+    exec git ls-files
 fi
 
 if [ -x "$(command -v fd)" ]; then
-    # fd with a directory argument outputs full paths from that dir
-    # --strip-cwd-prefix makes them relative to CWD which is what we want
-    exec fd --type f --strip-cwd-prefix . "$dir"
+    exec fd --type f --strip-cwd-prefix
 fi
 
 echo "Not in a git repo" >&2
