@@ -85,6 +85,3 @@
     conflictstyle = zdiff3
 [include]
     path = ~/.gitconfig.local
-[user]
-	email = code@esamatti.fi
-	name = Esa-Matti Suuronen
