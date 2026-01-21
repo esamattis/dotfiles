@@ -1,0 +1,7 @@
+#!/bin/sh
+
+set -eu
+
+printf '\n\n```file:%s:%s\n%s\n```\n\n' "$ZED_RELATIVE_FILE" "$ZED_ROW" "$ZED_SELECTED_TEXT" | pbcopy
+
+osascript -e "display notification \"$ZED_FILENAME:$ZED_ROW\" with title \"Copied to clipboard\""
