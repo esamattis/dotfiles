@@ -167,6 +167,32 @@ bindkey '^G' esamattis-fasd-pick-dir
 # fzf keybindings install:
 source <(fzf --zsh)
 
+# Custom fzf-file-widget with prefix directory support
+# When the command line contains something like `ls dir` and ctrl-t is pressed,
+# fzf will search within `dir/` instead of the current directory.
+fzf-file-widget() {
+  local prefix_dir=""
+  local lbuf_trimmed="${LBUFFER##* }"  # Get last word (after last space)
+
+  # Check if the last word is a directory
+  if [[ -n "$lbuf_trimmed" && -d "$lbuf_trimmed" ]]; then
+    prefix_dir="$lbuf_trimmed"
+  fi
+
+  local selected
+  if [[ -n "$prefix_dir" ]]; then
+    selected="$(FZF_CTRL_T_COMMAND="$FZF_CTRL_T_COMMAND $prefix_dir" __fzf_select)"
+  else
+    selected="$(__fzf_select)"
+  fi
+
+  LBUFFER="${LBUFFER}${selected}"
+  local ret=$?
+  zle reset-prompt
+  return $ret
+}
+zle -N fzf-file-widget
+
 
 if [ -f ~/code/fzf-tab/fzf-tab.plugin.zsh ]; then
     source ~/code/fzf-tab/fzf-tab.plugin.zsh
