@@ -182,6 +182,9 @@ fzf-file-widget() {
   local selected
   if [[ -n "$prefix_dir" ]]; then
     selected="$(FZF_CTRL_T_COMMAND="$FZF_CTRL_T_COMMAND $prefix_dir" __fzf_select)"
+    # Remove the prefix directory from LBUFFER before appending selection
+    # since the selection already includes the prefix path
+    LBUFFER="${LBUFFER%"$lbuf_trimmed"}"
   else
     selected="$(__fzf_select)"
   fi
