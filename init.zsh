@@ -12,18 +12,15 @@ _esamatti_dotfiles_init() {
         prefix="$(brew --prefix)"
     fi
 
-    if [ "$os" = "Darwin" ]; then
+    if [ -d "${prefix}/share/zsh/site-functions" ]; then
         fpath+=("${prefix}/share/zsh/site-functions")
+    fi
 
-        # pure installed using homebrew
-        # https://github.com/sindresorhus/pure
-        if [ -f "${prefix}/share/zsh/site-functions/prompt_pure_setup"  ]; then
-            source  "${prefix}/share/zsh/site-functions/prompt_pure_setup"
-            has_pure=1
-        fi
-    elif [ -d "$HOME/.zsh/pure" ]; then
-      fpath+=($HOME/.zsh/pure)
-      has_pure=1
+    # pure installed using homebrew
+    # https://github.com/sindresorhus/pure
+    if [ -f "${prefix}/share/zsh/site-functions/prompt_pure_setup"  ]; then
+        source  "${prefix}/share/zsh/site-functions/prompt_pure_setup"
+        has_pure=1
     fi
 
     if [ "$os" != "Darwin" ] && [ -x "$(command -v keychain)" ]; then
