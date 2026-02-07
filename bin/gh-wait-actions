@@ -1,0 +1,56 @@
+#!/bin/bash
+
+set -eu
+
+show_help() {
+    cat << EOF
+Usage: gh-wait-actions [OPTIONS]
+
+Watch GitHub Actions checks for the current PR and notify when complete.
+
+Options:
+    -f, --fail-fast    Exit as soon as any check fails
+    -h, --help         Show this help message
+
+Examples:
+    gh-wait-actions
+    gh-wait-actions --fail-fast
+EOF
+}
+
+FAIL_FAST=""
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -f|--fail-fast)
+            FAIL_FAST="--fail-fast"
+            shift
+            ;;
+        -h|--help)
+            show_help
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1"
+            show_help
+            exit 1
+            ;;
+    esac
+done
+
+BRANCH=$(git branch --show-current)
+
+
+EXIT_CODE=0
+gh pr checks "$BRANCH" --watch $FAIL_FAST || EXIT_CODE=$?
+
+# Play system sound
+afplay /System/Library/Sounds/Glass.aiff &
+
+# Show notification with branch name and exit code
+osascript -e "display alert \"GitHub Actions\" message \"Exit code: $EXIT_CODE\n$BRANCH\n\""
+
+# Log the exit code
+echo "Exit code: $EXIT_CODE"
+
+exit $EXIT_CODE
