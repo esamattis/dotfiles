@@ -3,6 +3,35 @@
 
 set -eu
 
+usage() {
+    cat <<'EOF'
+Usage: ssh-add-op [options] [key]
+
+Add SSH keys to the agent with passphrases fetched from 1Password.
+
+Each SSH key that has its passphrase stored in 1Password should have a
+companion .op file next to it (e.g. ~/.ssh/id_ed25519.op) containing the
+1Password item ID for the passphrase.
+
+Options:
+  -h, --help    Show this help message and exit
+  -d            Remove all identities from the agent before adding
+
+Arguments:
+  key           Path to the SSH key to add. If omitted, an interactive
+                picker (fzf) is shown listing all keys that have a
+                corresponding .op file in ~/.ssh/.
+
+The key is added with a 12-hour lifetime (-t 12h). The passphrase is
+retrieved automatically via _ssh_askpass_op.sh using SSH_ASKPASS.
+EOF
+}
+
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
+    usage
+    exit 0
+fi
+
 export SSH_ASKPASS="$(which _ssh_askpass_op.sh)"
 export SSH_ASKPASS_REQUIRE=force
 
