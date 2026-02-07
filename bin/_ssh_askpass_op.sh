@@ -13,5 +13,5 @@ fi
 
 op_item_id="$(cat "$ip_id_file")"
 
->&2 echo "Asking $op_item_id from 1Password"
+>&2 echo "Asking \"$op_item_id\" from 1Password"
 exec op item get --vault CLI "$op_item_id" --reveal --fields password
