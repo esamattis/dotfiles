@@ -64,3 +64,19 @@ rm -rf .homegit-tmp
 [github]
   user = esamattis
 ```
+
+
+## Aerospace
+
+https://github.com/FelixKratz/JankyBorders
+
+```
+brew tap FelixKratz/formulae
+brew install borders
+```
+
+https://nikitabobko.github.io/AeroSpace
+
+```
+brew install --cask nikitabobko/tap/aerospace
+```
