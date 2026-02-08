@@ -1,4 +1,4 @@
-# Tricks and Scripts
+# dotfiles
 
 Personal crap.
 
