@@ -111,10 +111,10 @@ zstyle ':prompt:pure:prompt:error' color red
 
 
 alias keyboard-assistant='sudo open /System/Library/CoreServices/KeyboardSetupAssistant.app/Contents/MacOS/KeyboardSetupAssistant'
-alias node_modules_to_path='export PATH="$(pwd)/node_modules/.bin":$PATH'
+alias ,node_modules_to_path='export PATH="$(pwd)/node_modules/.bin":$PATH'
 alias find_old_node_modules='find . -name node_modules -type d -maxdepth 2 -mtime +30'
 alias cd-git-root='cd "$(git rev-parse --show-toplevel)"'
-alias gbj="git branch-jump"
+alias ,r='cd "$(git rev-parse --show-toplevel)"'
 
 
 git-add-to-existing() {
@@ -231,7 +231,7 @@ compdef _gnu_generic zed
 autoload zmv
 
 
-ni() {
+,ni() {
   # Add packages
   if [ "${1:-}" != "" ]; then
     if [ -f pnpm-lock.yaml ] || [ -f ../../pnpm-lock.yaml ]; then
@@ -253,17 +253,17 @@ ni() {
   fi
 }
 
-dark()  {
+,dark()  {
   iterm-profile.py Dark
   export ITERM_PROFILE=Dark
 }
 
-light()  {
+,light()  {
   iterm-profile.py Light
   export ITERM_PROFILE=Light
 }
 
-gwr() {
+,gwr() {
     cd "$(git rev-parse --show-toplevel)"
     if [ -f .git ]; then
       cd ..
@@ -271,7 +271,7 @@ gwr() {
     fi
 }
 
-gwj() {
+,gwj() {
   local dir=$(
     gwr
     git worktree list  | fzf --header="Jump to git worktree"
@@ -285,7 +285,7 @@ gwj() {
 }
 
 
-gwc() {
+,gwc() {
   git fetch --all
   # local branch=$(git branch -r | cut -d / -f 2- | fzf --header="Checkout git worktree")
   local branch=$(git branch -r --sort=-committerdate --format '%(refname:short)' | head -n 20 | cut -c 8- | fzf --header="Select branch")
@@ -315,7 +315,7 @@ gwc() {
 }
 
 
-gwdestroy() {
+,gwdestroy() {
   cd "$(git rev-parse --show-toplevel)"
 
   if [ ! -f .git ]; then
@@ -339,7 +339,7 @@ gwdestroy() {
 # Create a pull request against the current branch.
 # Generates a new local branch automatically, pushes it to github and open PR creation form.
 # Requires the GH CLI.
-gh-pr() {
+,gh-pr() {
 	if [ "$(git status --porcelain)" != "" ]; then
 		echo "Not clean git"
 		return 1
@@ -429,7 +429,7 @@ gh-pr() {
 }
 
 # Jump to a directory in $HOME/code using fzf
-p() {
+,p() {
     local dir=$(ls -1 $HOME/code | fzf --header="Jump to project")
     cd "$HOME/code/$dir"
 }
@@ -469,16 +469,16 @@ __esamatti_yazi() {
 zle -N __esamatti_yazi
 bindkey ^f __esamatti_yazi
 
-alias cd-yazi='__esamatti_yazi --cd'
-alias x='chmod +x'
+alias ,cd-yazi='__esamatti_yazi --cd'
+alias ,x='chmod +x'
 
 # https://news.ycombinator.com/item?id=11071754
-alias config='/usr/bin/git --git-dir=$HOME/.myconf/ --work-tree=$HOME'
+alias ,config='/usr/bin/git --git-dir=$HOME/.homegit/ --work-tree=$HOME'
 # git init --bare $HOME/.myconf
 # config config status.showUntrackedFiles no
 
-config-git() {
-   export GIT_DIR=$HOME/.myconf
+,config-git() {
+   export GIT_DIR=$HOME/.homegit
    export GIT_WORK_TREE=$HOME
 }
 
@@ -488,16 +488,16 @@ git-wat() {
     # git standup -A "22-05-2025 00:00:00" -B "22-05-2025 23:59:59" -D local
 }
 
-cd-fzf() {
+,cd-fzf() {
     cd "$(fd -t d | fzf)"
 
 }
 
-oc-commit() {
+,oc-commit() {
     opencode run --model github-copilot/claude-sonnet-4.5 --message "Read the git local changes and make one or multiple git commits from it"
 }
 
-oc-fix-clippy() {
+,oc-fix-clippy() {
     cargo clippy --fix
     local clippy_exit=$?
     if [ $clippy_exit -ne 0 ]; then
