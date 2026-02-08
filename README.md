@@ -43,8 +43,13 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/esamattis/dotfiles/refs/
 
 ## Home homegit
 
+Credits https://news.ycombinator.com/item?id=11071754
+
 ```
-git clone --separate-git-dir=~/.homegit git@github.com:esamattis/homegit.git ~
+git clone --separate-git-dir=$HOME/.homegit git@github.com:esamattis/homegit.git $HOME/.homegit-tmp
+,config config status.showUntrackedFiles no
+rm -rf .homegit-tmp
+,config st
 ```
 
 ## Git config
