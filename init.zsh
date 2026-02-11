@@ -113,8 +113,7 @@ zstyle ':prompt:pure:prompt:error' color red
 alias keyboard-assistant='sudo open /System/Library/CoreServices/KeyboardSetupAssistant.app/Contents/MacOS/KeyboardSetupAssistant'
 alias ,node_modules_to_path='export PATH="$(pwd)/node_modules/.bin":$PATH'
 alias find_old_node_modules='find . -name node_modules -type d -maxdepth 2 -mtime +30'
-alias cd-git-root='cd "$(git rev-parse --show-toplevel)"'
-alias ,r='cd "$(git rev-parse --show-toplevel)"'
+alias ,cd-git-root='cd "$(git rev-parse --show-toplevel)"'
 
 
 git-add-to-existing() {
@@ -494,7 +493,12 @@ git-wat() {
 }
 
 ,oc-commit() {
-    opencode run --model github-copilot/claude-sonnet-4.5 --message "Read the git local changes and make one or multiple git commits from it"
+    local extra_context="${1:-}"
+    local message="Read the git local changes and make one or multiple git commits from it. Do not use conventional commits."
+    if [ -n "$extra_context" ]; then
+        message="$message. Additional context: $extra_context"
+    fi
+    opencode run --model github-copilot/claude-sonnet-4.5 --message "$message"
 }
 
 ,oc-fix-clippy() {
