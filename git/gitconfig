@@ -1,14 +1,14 @@
 [apply]
-  whitespace = nowarn
+	whitespace = nowarn
 [color]
-  branch = auto
-  diff = auto
-  status = auto
+	branch = auto
+	diff = auto
+	status = auto
 	ui = true
 [color "branch"]
-  current = yellow reverse
-  local = yellow
-  remote = green
+	current = yellow reverse
+	local = yellow
+	remote = green
 [color "diff"]
 	meta = 11
 	frag = magenta bold
@@ -17,28 +17,26 @@
 	commit = yellow bold
 	whitespace = red reverse
 [color "status"]
-  added = yellow
-  changed = green
-  untracked = cyan
+	added = yellow
+	changed = green
+	untracked = cyan
 [alias]
-  st = status -sb
-  a = add-untracked
-  l = log --graph --pretty=format:'%C(yellow)%h%C(cyan)%d%Creset %s %C(white)- %an, %ar%Creset'
-  today = log --since="6am" --graph --pretty=format:'%C(yellow)%h%C(cyan)%d%Creset %s %C(white)- %an, %ar%Creset'
-  l-day = !git log --after="$1 00:00" --until="$1 23:59" --author="$(git config user.name)"
-  ll = log --stat --abbrev-commit
-  # Sorted tag list
-  stag = for-each-ref --sort='*authordate' --format='%(refname:short)' refs/tags
-  rh = reset HEAD
-  addu = add-untracked
-  cicleanup = commit -m 'cleanup\n\nNon functional code cleaning'
-  cistyle = commit -m 'style++\n\nJust a simple style change for the great good'
-  # "git stash pop" but without merging. Just force overrides workind directory files
-  stash-pop-force = !git read-tree stash && git checkout-index -f && git reset HEAD && git stash drop
-  not-pushed = !git l ${1:-origin/master}..HEAD
-  cached = diff --cached
-  reset-upstream = !git reset --hard $(git rev-parse --abbrev-ref --symbolic-full-name @{u})
-  difft = difftool
+	st = status -sb
+	a = add-untracked
+	l = log --graph --pretty=format:'%C(yellow)%h%C(cyan)%d%Creset %s %C(white)- %an, %ar%Creset'
+	today = log --since="6am" --graph --pretty=format:'%C(yellow)%h%C(cyan)%d%Creset %s %C(white)- %an, %ar%Creset'
+	l-day = !git log --after="$1 00:00" --until="$1 23:59" --author="$(git config user.name)"
+	ll = log --stat --abbrev-commit
+	stag = for-each-ref --sort='*authordate' --format='%(refname:short)' refs/tags
+	rh = reset HEAD
+	addu = add-untracked
+	cicleanup = commit -m 'cleanup\n\nNon functional code cleaning'
+	cistyle = commit -m 'style++\n\nJust a simple style change for the great good'
+	stash-pop-force = !git read-tree stash && git checkout-index -f && git reset HEAD && git stash drop
+	not-pushed = !git l ${1:-origin/master}..HEAD
+	cached = diff --cached
+	reset-upstream = !git reset --hard $(git rev-parse --abbrev-ref --symbolic-full-name @{u})
+	difft = difftool
 [push]
 	default = simple
 [gc]
@@ -46,9 +44,7 @@
 [core]
 	pager = delta
 	excludesFile = ~/.gitignore
-	hooksPath = /home/esamatti/code/dotfiles/git/hooks
-
-# https://difftastic.wilfred.me.uk/git.html#regular-usage
+	hooksPath = ~/code/dotfiles/git/hooks
 [diff]
 	tool = difftastic
 [difftool]
@@ -57,7 +53,6 @@
 	cmd = difft "$LOCAL" "$REMOTE"
 [pager]
 	difftool = true
-
 [url "https://"]
 	insteadOf = git://
 [grep]
@@ -65,23 +60,14 @@
 [pull]
 	ff = only
 [init]
-	defaultBranchl = main
 	defaultBranch = main
-[include]
-  path = ~/.gitconfig.local
 [interactive]
-	diffFilter =  delta --color-only
-; [gpg]
-; format = ssh
-; [commit]
-; 	gpgsign = true
+	diffFilter = delta --color-only
 [delta]
-    navigate = true    # use n and N to move between diff sections
-
-    # delta detects terminal colors automatically; set one of these to disable auto-detection
-    # dark = true
-    # light = true
+	navigate = true
 [merge]
-    conflictstyle = zdiff3
+	conflictstyle = zdiff3
+[gpg]
+	format = ssh
 [include]
-    path = ~/.gitconfig.local
+	path = ~/.gitconfig.local

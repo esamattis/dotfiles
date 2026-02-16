@@ -60,7 +60,9 @@ rm -rf .homegit-tmp
 [user]
   name = Esa-Matti Suuronen
   email = code@esamatti.fi
-  #signingkey = /Users/esamatti/.ssh/id_ed25519.pub
+  #signingkey = ~/.ssh/id_ed25519.pub
+#[commit]
+#  gpgsign = true
 [github]
   user = esamattis
 ```
