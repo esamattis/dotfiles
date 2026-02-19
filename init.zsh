@@ -499,8 +499,8 @@ git-wat() {
     if [ -n "$extra_context" ]; then
         message="$message. Additional context: $extra_context"
     fi
-    local model="${EM_COMMIT_MODEL:-github-copilot/claude-opus-4.6}"
-    opencode run --model "$model" --message "$message"
+    local model="${EM_COMMIT_MODEL:-github-copilot/claude-sonnet-4.6}"
+    opencode --model "$model" --prompt "$message"
 }
 
 ,oc-fix-clippy() {
