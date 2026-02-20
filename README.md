@@ -20,6 +20,7 @@ source "$HOME/code/dotfiles/init.zsh"
 ## Tools from homebrew
 
 ```
+brew install starship
 brew install git-delta
 brew install jq
 brew install fzf
