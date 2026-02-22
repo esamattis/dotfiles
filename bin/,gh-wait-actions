@@ -41,6 +41,8 @@ done
 BRANCH=$(git branch --show-current)
 
 
+sleep 10
+
 EXIT_CODE=0
 gh pr checks "$BRANCH" --watch $FAIL_FAST || EXIT_CODE=$?
 
