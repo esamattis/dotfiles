@@ -1,9 +1,11 @@
 
+set nocompatible
+
 " colorscheme onedark
 syntax on
 
 "" Leader mappings
-let mapleader = ","
+let mapleader = " "
 
 " Helper variable for cross platform and vim/neovim usage
 if has("win32")
@@ -65,13 +67,13 @@ set wildmode=longest,list
 
 
 " Map escape key to jj -- much faster to exit insert mode
-imap jj <esc>
+inoremap jj <esc>
 
 
 
 " Write buffer (save)
 noremap <Leader>w :wa<CR>
-imap ,w <esc>:w<CR>
+imap <Leader>w <esc>:w<CR>
 
 " Automatically resize splits when the window is resized
 au VimResized * exe "normal! \<c-w>="
@@ -120,7 +122,7 @@ noremap <Leader>w :w<CR>
 
 " Close current buffer without closing split window
 " http://stackoverflow.com/a/4468491/153718
-noremap <Leader>d :bp\|bd #<CR>
+"noremap <Leader>d :bp\|bd #<CR>
 
 
 " Close windows
