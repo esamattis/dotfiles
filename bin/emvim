@@ -1,0 +1,7 @@
+#!/bin/sh
+
+set -eu
+
+
+unset VIMRUNTIME
+exec vim -u "$DOTFILES/vim/vimrc" "$@"
