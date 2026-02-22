@@ -46,11 +46,15 @@ sleep 10
 EXIT_CODE=0
 gh pr checks "$BRANCH" --watch $FAIL_FAST || EXIT_CODE=$?
 
-# Play system sound
-afplay /System/Library/Sounds/Glass.aiff &
-
-# Show notification with branch name and exit code
-osascript -e "display alert \"GitHub Actions\" message \"Exit code: $EXIT_CODE\n$BRANCH\n\""
+# Play system sound and show notification
+if [ "$(uname)" = "Darwin" ]; then
+    afplay /System/Library/Sounds/Glass.aiff &
+    # Show notification with branch name and exit code
+    osascript -e "display alert \"GitHub Actions\" message \"Exit code: $EXIT_CODE\n$BRANCH\n\""
+else
+    # Terminal bell
+    printf '\a'
+fi
 
 # Log the exit code
 echo "Exit code: $EXIT_CODE"
