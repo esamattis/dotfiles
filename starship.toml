@@ -48,6 +48,9 @@ disabled = true
 [nix_shell]
 disabled = true
 
+[package]
+disabled = true
+
 [directory]
 truncate_to_repo = true
 truncation_length = 7
