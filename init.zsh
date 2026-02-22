@@ -2,7 +2,7 @@
 # https://stackoverflow.com/a/18814147/153718
 export DOTFILES="${0:A:h}"
 
-pure_path=
+pure_setup=
 
 _esamatti_dotfiles_init() {
     local os="$(uname)"
@@ -18,8 +18,9 @@ _esamatti_dotfiles_init() {
 
     # pure installed using homebrew
     # https://github.com/sindresorhus/pure
-    if [ -f "${prefix}/share/zsh/site-functions/prompt_pure_setup"  ]; then
-        pure_path="${prefix}/share/zsh/site-functions/prompt_pure_setup"
+    local pure_path="${prefix}/share/zsh/site-functions/prompt_pure_setup"
+    if [ -f "$pure_path" ]; then
+        pure_setup="$pure_path"
     fi
 
     if [ "$os" != "Darwin" ] && [ -x "$(command -v keychain)" ]; then
@@ -37,8 +38,8 @@ promptinit
 if [ -x "$(command -v starship)" ]; then
   export STARSHIP_CONFIG="$DOTFILES/starship.toml"
   eval "$(starship init zsh)"
-elif [ -n "$pure_path" ]; then
-  source  "$pure_path"
+elif [ -n "$pure_setup" ]; then
+  source  "$pure_setup"
   prompt pure
 fi
 
