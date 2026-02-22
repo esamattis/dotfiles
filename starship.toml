@@ -4,6 +4,14 @@
 # Inserts a blank line between shell prompts
 add_newline = true
 
+# Git status symbols:
+# $ — stashed changes
+# ! — modified files
+# + — staged files
+# ? — untracked files
+# ✘ — deleted files
+# ⇡ — ahead of remote
+# ⇣ — behind remote
 format = """
 $directory
 $git_branch$git_commit$git_state$git_status$git_metrics\
@@ -31,5 +39,5 @@ disabled = true
 disabled = true
 
 [directory]
-truncate_to_repo = false
+truncate_to_repo = true
 truncation_length = 7
