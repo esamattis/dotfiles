@@ -16,7 +16,14 @@ format = """
 $directory
 $git_branch$git_commit$git_state$git_status$git_metrics\
 $all\
-$character"""
+$username$hostname$character
+"""
+
+[username]
+format = '[$user]($style) '
+
+[hostname]
+format = '[$ssh_symbol$hostname]($style) '
 
 [git_branch]
 format = '[$symbol$branch(:$remote_branch)]($style) '
@@ -25,6 +32,9 @@ format = '[$symbol$branch(:$remote_branch)]($style) '
 only_detached = false
 commit_hash_length = 6
 tag_symbol = '🔖 '
+
+[container]
+disabled = true
 
 [rust]
 disabled = true
