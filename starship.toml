@@ -13,8 +13,8 @@ add_newline = true
 # ⇡ — ahead of remote
 # ⇣ — behind remote
 format = """
-$directory
 $git_branch$git_commit$git_state$git_status$git_metrics
+📂 $directory
 $username$hostname$character
 """
 
