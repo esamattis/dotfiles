@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -eux
+set -eu
 
 if [ "${1-}" = "-h" ] || [ "${1-}" = "--help" ]; then
     echo "Create a new worktree under .git/myworktrees on a fresh temporary branch."
