@@ -1,0 +1,35 @@
+#!/bin/bash
+
+set -eu
+set -o pipefail
+
+branch="${1:-origin/main}"
+
+>&2 echo "This will rebase and reset against: $branch"
+>&2 echo
+read -p "type 'y' to continue> " response
+
+if [ "$response" != "y" ]; then
+    >&2 echo "Abort."
+    exit 1
+fi
+
+git fetch
+
+# Auto-commit dirty changes
+if ! git diff --quiet || ! git diff --cached --quiet || [ -n "$(git ls-files --others --exclude-standard)" ]; then
+    >&2 echo "Dirty working tree detected. Creating a temporary commit..."
+    git add -A
+    git commit -m "wip"
+fi
+
+>&2 echo
+>&2 echo "Rebasing against $branch..."
+git rebase "$branch"
+
+>&2 echo
+>&2 echo "Resetting against $branch..."
+git reset "$branch"
+
+>&2 echo
+>&2 echo "Done."
