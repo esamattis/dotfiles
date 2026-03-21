@@ -1,0 +1,83 @@
+#!/bin/sh
+
+set -eux
+
+if [ "${1-}" = "-h" ] || [ "${1-}" = "--help" ]; then
+    echo "Create a new worktree under .git/myworktrees on a fresh temporary branch."
+    echo "Carries over local changes by making a temporary commit and resetting it in both worktrees."
+    echo "The temporary branch name is derived from the worktree name."
+    exit 0
+fi
+
+cd "$(git rev-parse --show-toplevel 2>/dev/null)" || {
+    echo "Not in a git repository" >&2
+    exit 1
+}
+
+common_dir="$(git rev-parse --git-common-dir 2>/dev/null)"
+if [ -z "$common_dir" ]; then
+    echo "Not in a git repository" >&2
+    exit 1
+fi
+
+base_branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)"
+if [ -z "$base_branch" ] || [ "$base_branch" = "HEAD" ]; then
+    echo "Could not determine current branch" >&2
+    exit 1
+fi
+
+worktree_name="${1-}"
+if [ -z "$worktree_name" ]; then
+    printf "Worktree name> "
+    IFS= read -r worktree_name
+fi
+
+if [ -z "$worktree_name" ]; then
+    echo "Worktree name is required" >&2
+    exit 1
+fi
+
+sanitized_name="$(printf "%s" "$worktree_name" | tr '[:upper:]' '[:lower:]' | tr '[:space:]' '_')"
+if [ -z "$sanitized_name" ]; then
+    echo "Worktree name is empty after sanitizing" >&2
+    exit 1
+fi
+
+tmp_branch="${base_branch}-${sanitized_name}"
+status_output="$(git status --porcelain)"
+tmp_commit_created=0
+worktree_path="${common_dir}/myworktrees/${sanitized_name}"
+
+if [ -n "$status_output" ]; then
+    git add -A
+    git commit -m "tmp worktree commit"
+    tmp_commit_created=1
+fi
+
+cleanup_tmp_commit() {
+    if [ "$tmp_commit_created" -eq 1 ]; then
+        git -C "$worktree_path" reset --mixed HEAD^
+        git reset --mixed HEAD^
+    fi
+}
+
+if ! git worktree add -b "$tmp_branch" "$worktree_path" "$base_branch"; then
+    echo "Failed to create worktree at $worktree_path from new branch $tmp_branch based on $base_branch" >&2
+    cleanup_tmp_commit
+    exit 1
+fi
+
+cleanup_tmp_commit
+
+if [ -f .envrc ]; then
+    cp .envrc "$worktree_path/.envrc"
+    (
+        cd "$worktree_path"
+        direnv allow
+    )
+fi
+
+echo
+echo
+echo
+echo "$worktree_path"
