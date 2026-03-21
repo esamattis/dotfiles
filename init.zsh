@@ -143,18 +143,6 @@ repeat_n () {
   done
 }
 
-esamattis-fasd-pick-dir() {
-  LBUFFER="${LBUFFER}$(fasd -d -l | fzf --keep-right)"
-  local ret=$?
-  zle reset-prompt
-  return $ret
-}
-
-
-zle -N esamattis-fasd-pick-dir
-# Use Ctrl+g to pick recently used directory
-bindkey '^G' esamattis-fasd-pick-dir
-
 # fzf keybindings install:
 if [ "$(command -v fzf)" != "" ]; then
     source <(fzf --zsh)
