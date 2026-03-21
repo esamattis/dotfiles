@@ -203,13 +203,15 @@ fzf-file-widget() {
   zle reset-prompt
   return $ret
 }
+# Register fzf-file-widget as a ZLE (Zsh Line Editor) widget
+# ZLE is Zsh's command-line editing system that handles keyboard input and text manipulation
 zle -N fzf-file-widget
 
 
 if [ -f ~/code/fzf-tab/fzf-tab.plugin.zsh ]; then
     source ~/code/fzf-tab/fzf-tab.plugin.zsh
 else
-    echo "fzf-tab plugin not found" >&2
+    echo "fzf-tab plugin not found from ~/code/fzf-tab/fzf-tab.plugin.zsh" >&2
 fi
 
 # Remove CWD dirs from fzf-z
