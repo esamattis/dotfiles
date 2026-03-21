@@ -21,6 +21,7 @@ source "$HOME/code/dotfiles/init.zsh"
 
 ```
 brew install starship
+brew install television
 brew install git-delta
 brew install jq
 brew install fzf
