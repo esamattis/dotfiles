@@ -218,38 +218,6 @@ compdef _gnu_generic zed
 autoload zmv
 
 
-,ni() {
-  # Add packages
-  if [ "${1:-}" != "" ]; then
-    if [ -f pnpm-lock.yaml ] || [ -f ../../pnpm-lock.yaml ]; then
-      pnpm install $@ && pnpm install
-    else
-      npm install $@
-    fi
-    return
-  fi
-
-  # Prefer installing using the lock file to avoid faker.js like issue.
-  # Just call the original command manually when need to update the lock
-  if [ -f pnpm-lock.yaml ] || [ -f ../../pnpm-lock.yaml ]; then
-    pnpm install --frozen-lockfile
-  elif [ -f package-lock.json ] ; then
-    npm ci
-  else
-    npm install
-  fi
-}
-
-,dark()  {
-  iterm-profile.py Dark
-  export ITERM_PROFILE=Dark
-}
-
-,light()  {
-  iterm-profile.py Light
-  export ITERM_PROFILE=Light
-}
-
 ,gwr() {
     cd "$(git rev-parse --show-toplevel)"
     if [ -f .git ]; then
@@ -415,48 +383,6 @@ autoload zmv
     echo "The PR title has been copied to the clipboard"
 }
 
-# Jump to a directory in $HOME/code using fzf
-,p() {
-    local dir=$(ls -1 $HOME/code | fzf --header="Jump to project")
-    cd "$HOME/code/$dir"
-}
-
-__esamatti_yazi() {
-    local arg="$1"
-    local file=/tmp/zsh-yazi.txt
-
-    while true; do
-        rm -f "$file"
-
-        # workaround for https://github.com/sxyazi/yazi/issues/2278#issuecomment-2629352138
-        yazi --chooser-file "$file"  < /dev/tty
-
-        if [ ! -f "$file" ]; then
-            return
-        fi
-
-        local selected="$(cat "$file")"
-
-        if [ "$arg" = "--cd" ]; then
-            if [ -d "$selected" ]; then
-                cd "$selected"
-            else
-                cd "$(dirname "$selected")"
-            fi
-            return
-        fi
-
-        BUFFER+="$selected"
-        zle reset-prompt
-        return
-    done
-}
-
-
-zle -N __esamatti_yazi
-bindkey ^f __esamatti_yazi
-
-alias ,cd-yazi='__esamatti_yazi --cd'
 alias ,x='chmod +x'
 
 # https://news.ycombinator.com/item?id=11071754
@@ -473,11 +399,6 @@ alias ,config='/usr/bin/git --git-dir=$HOME/.homegit/ --work-tree=$HOME'
 git-wat() {
     git standup -A "$1 00:00:00" -B "$1 23:59:59" -D local
     # git standup -A "22-05-2025 00:00:00" -B "22-05-2025 23:59:59" -D local
-}
-
-,cd-fzf() {
-    cd "$(fd -t d | fzf)"
-
 }
 
 ,oc-commit() {
