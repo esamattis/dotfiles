@@ -3,16 +3,17 @@
 set -eu
 
 if [ "${1-}" = "-h" ] || [ "${1-}" = "--help" ]; then
-    echo "Create a new worktree under .git/myworktrees on a fresh temporary branch."
+    echo "Create a new worktree as a sibling directory on a fresh temporary branch."
     echo "Carries over local changes by making a temporary commit and resetting it in both worktrees."
     echo "The temporary branch name is derived from the worktree name."
     exit 0
 fi
 
-cd "$(git rev-parse --show-toplevel 2>/dev/null)" || {
+toplevel="$(git rev-parse --show-toplevel 2>/dev/null)" || {
     echo "Not in a git repository" >&2
     exit 1
 }
+cd "$toplevel"
 
 common_dir="$(git rev-parse --git-common-dir 2>/dev/null)"
 if [ -z "$common_dir" ]; then
@@ -46,7 +47,12 @@ fi
 tmp_branch="${base_branch}-${sanitized_name}"
 status_output="$(git status --porcelain)"
 tmp_commit_created=0
-worktree_path="${common_dir}/myworktrees/${sanitized_name}"
+# Resolve the original repo root from common_dir (.git dir), so this works
+# even when run from inside an existing worktree.
+abs_common_dir="$(cd "$common_dir" && pwd)"
+original_repo="$(dirname "$abs_common_dir")"
+repo_dir_name="$(basename "$original_repo")"
+worktree_path="$(dirname "$original_repo")/${repo_dir_name}-gw-${sanitized_name}"
 
 if [ -n "$status_output" ]; then
     git add -A
