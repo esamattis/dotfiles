@@ -60,6 +60,10 @@ if [ -n "$status_output" ]; then
     tmp_commit_created=1
 fi
 
+# The tmp commit carries local changes to the new worktree via the commit
+# graph. Once both worktrees have it at HEAD, "reset --mixed HEAD^" undoes the
+# commit in each while keeping the changes as unstaged modifications — restoring
+# the original uncommitted state in both worktrees.
 cleanup_tmp_commit() {
     if [ "$tmp_commit_created" -eq 1 ]; then
         git -C "$worktree_path" reset --mixed HEAD^
