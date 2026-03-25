@@ -332,13 +332,9 @@ git-wat() {
     local extra_context="${1:-}"
     local message="Read the git local changes and make one or multiple git commits from it. Do not use conventional commits.
 
-    You are an expert at writing Git commits. Your job is to write a short clear commit message that summarizes the changes.
-
     If you can accurately express the change in just the subject line, don't include anything in the message body. Only use the body when it is providing *useful* information.
 
     Don't repeat information from the subject line in the message body.
-
-    Only return the commit message in your response. Do not include any additional meta-commentary about the task. Do not include the raw diff output in the commit message.
 
     Follow good Git style:
 
