@@ -148,9 +148,9 @@ if [ "$(command -v fzf)" != "" ]; then
     source <(fzf --zsh)
 fi
 
-if [ "$(command -v tv)" != "" ]; then
-    eval "$(tv init zsh)"
-fi
+# if [ "$(command -v tv)" != "" ]; then
+#     eval "$(tv init zsh)"
+# fi
 
 # Custom fzf-file-widget with prefix directory support
 # When the command line contains something like `ls dir` and ctrl-t is pressed,
