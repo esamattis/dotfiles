@@ -1,0 +1,57 @@
+#!/bin/sh
+
+set -eu
+
+usage() {
+    cat <<'EOF'
+Usage: $(basename "$0") [duration]
+
+Keep the system awake using `caffeinate -disu`.
+
+Duration defaults to `1h`. Supported suffixes: `s`, `m`, `h`.
+Examples: `30m`, `45s`, `2h`, `3600`
+EOF
+}
+
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
+    usage
+    exit 0
+fi
+
+if [ "$#" -gt 1 ]; then
+    usage >&2
+    exit 1
+fi
+
+duration=${1:-1h}
+
+case "$duration" in
+*[!0-9])
+    value=${duration%?}
+    unit=${duration#$value}
+    ;;
+*)
+    value=$duration
+    unit=s
+    ;;
+esac
+
+case "$value" in
+'' | *[!0-9]*)
+    printf 'Invalid duration: %s\n' "$duration" >&2
+    exit 1
+    ;;
+esac
+
+case "$unit" in
+s) seconds=$((value)) ;;
+m) seconds=$((value * 60)) ;;
+h) seconds=$((value * 60 * 60)) ;;
+*)
+    printf 'Invalid duration unit: %s\n' "$duration" >&2
+    exit 1
+    ;;
+esac
+
+set -x
+exec caffeinate -disu -t "$seconds"
