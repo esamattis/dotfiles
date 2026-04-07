@@ -1,19 +1,26 @@
 #!/bin/sh
 
-set -eu
+set -eux
 
+# Format the selected text as a fenced code block with file path and line number
 CLIP=$(printf '\n\n```%s#%s\n%s\n```\n\n' "$ZED_RELATIVE_FILE" "$ZED_ROW" "$ZED_SELECTED_TEXT")
 echo "$CLIP" | pbcopy
 
+
 CLIP_FILE="$TMPDIR/zed-combined-clipboard.txt"
 
+# Remove the combined clipboard file if it was last modified more than 2 hours ago
 if [ -f "$CLIP_FILE" ]; then
-    FILE_AGE=$(( $(date +%s) - $(stat -f %m "$CLIP_FILE") ))
-    if [ "$FILE_AGE" -gt 7200 ]; then
-        rm "$CLIP_FILE"
+    FILE_MOD=$(stat -c %Y "$CLIP_FILE" 2>/dev/null || stat -f %m "$CLIP_FILE" 2>/dev/null || true)
+    if [ -n "$FILE_MOD" ]; then
+        FILE_AGE=$(( $(date +%s) - $FILE_MOD ))
+        if [ "$FILE_AGE" -gt 7200 ]; then
+            rm "$CLIP_FILE"
+        fi
     fi
 fi
 
+# Append the snippet to the combined clipboard file if it's not already present
 EXISTING=$(cat "$CLIP_FILE" 2>/dev/null || true)
 case "$EXISTING" in
     *"$CLIP"*) ;;
