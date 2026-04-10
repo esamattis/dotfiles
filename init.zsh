@@ -364,3 +364,7 @@ git-wat() {
 
 # auto complete git-commands
 zstyle ':completion:*:*:git:*' user-commands ${${(M)${(k)commands}:#git-*}#git-}
+
+if [ "${ZED_TERM}" = "true" ]; then
+    export VISUAL="zed --wait"
+fi
