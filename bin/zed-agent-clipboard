@@ -1,0 +1,222 @@
+#!/usr/bin/env python3
+"""
+Unified clipboard manager for Zed editor agent workflows.
+
+Usage:
+    zed-agent-clipboard --copy       Copy selected text from Zed as a fenced code block
+    zed-agent-clipboard --paste-all  Paste all accumulated clipboard entries
+    zed-agent-clipboard --print      Print all clipboard entries with ages
+    zed-agent-clipboard --print-json Output the raw JSON clipboard file
+    zed-agent-clipboard --clear      Clear all accumulated clipboard entries
+"""
+
+import argparse
+import json
+import os
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+CLIPBOARD_FILE = Path.home() / ".local" / "share" / "zed-agent-clipboard.json"
+MAX_AGE_SECONDS = 15 * 60  # 15 minutes
+
+
+def load_entries():
+    """Load clipboard entries from the JSON file."""
+    if not CLIPBOARD_FILE.exists():
+        return []
+    try:
+        with open(CLIPBOARD_FILE, "r") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, IOError):
+        return []
+
+
+def save_entries(entries):
+    """Save clipboard entries to the JSON file as prettified JSON."""
+    CLIPBOARD_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(CLIPBOARD_FILE, "w") as f:
+        json.dump(entries, f, indent=2)
+        f.write("\n")
+
+
+def purge_old_entries(entries):
+    """Remove entries older than MAX_AGE_SECONDS."""
+    now = time.time()
+    return [e for e in entries if (now - e["timestamp"]) <= MAX_AGE_SECONDS]
+
+
+def pbcopy(text):
+    """Copy text to the macOS system clipboard."""
+    proc = subprocess.Popen(["pbcopy"], stdin=subprocess.PIPE)
+    proc.communicate(text.encode("utf-8"))
+
+
+def pbpaste():
+    """Get text from the macOS system clipboard."""
+    return subprocess.check_output(["pbpaste"]).decode("utf-8")
+
+
+def do_copy():
+    """Copy the current Zed selection as a fenced code block and accumulate it."""
+    rel_file = os.environ.get("ZED_RELATIVE_FILE", "")
+    row = os.environ.get("ZED_ROW", "")
+    selected_text = os.environ.get("ZED_SELECTED_TEXT", "")
+
+    if not selected_text:
+        print("No ZED_SELECTED_TEXT set", file=sys.stderr)
+        sys.exit(1)
+
+    snippet = f"\n```{rel_file}#L{row}\n{selected_text}\n```\n"
+
+    # Copy to system clipboard
+    pbcopy(snippet)
+
+    # Load existing entries and purge old ones
+    entries = load_entries()
+    entries = purge_old_entries(entries)
+
+    # Avoid duplicates — check if this exact snippet already exists
+    existing_snippets = {e["text"] for e in entries}
+    if snippet not in existing_snippets:
+        entries.append(
+            {
+                "timestamp": time.time(),
+                "file": rel_file,
+                "row": row,
+                "text": snippet,
+            }
+        )
+
+    save_entries(entries)
+    print(f"Copied snippet from {rel_file}#L{row} ({len(entries)} total)")
+
+
+def do_paste_all():
+    """Paste all accumulated clipboard entries via simulated Cmd+V."""
+    entries = load_entries()
+    if not entries:
+        print("No clipboard entries found", file=sys.stderr)
+        sys.exit(1)
+
+    combined = "".join(e["text"] for e in entries)
+
+    # Save current clipboard
+    old_clipboard = pbpaste()
+
+    # Put combined text into clipboard
+    pbcopy(combined)
+
+    # Simulate Cmd+V paste via AppleScript
+    subprocess.run(
+        [
+            "osascript",
+            "-e",
+            'tell application "System Events" to keystroke "v" using command down',
+        ],
+        check=True,
+    )
+
+    # Give a moment for the paste to complete, then restore old clipboard
+    time.sleep(0.5)
+    pbcopy(old_clipboard)
+
+    print(f"Pasted {len(entries)} entries")
+
+
+def format_age(seconds):
+    """Format a duration in seconds as a human-readable age string."""
+    seconds = int(seconds)
+    if seconds < 60:
+        return f"{seconds}s ago"
+    minutes = seconds // 60
+    if minutes < 60:
+        return f"{minutes}m {seconds % 60}s ago"
+    hours = minutes // 60
+    return f"{hours}h {minutes % 60}m ago"
+
+
+def do_print():
+    """Print all clipboard entries with pretty-printed ages."""
+    entries = load_entries()
+    if not entries:
+        print("No clipboard entries.")
+        return
+
+    now = time.time()
+    for i, entry in enumerate(entries, 1):
+        age = now - entry["timestamp"]
+        file_ref = (
+            f"{entry['file']}#L{entry['row']}" if entry.get("file") else "unknown"
+        )
+        lines = entry["text"].strip().count("\n") + 1
+        print(
+            f"── Entry {i}/{len(entries)}  {file_ref}  ({format_age(age)}, {lines} lines) ──"
+        )
+        print(entry["text"].strip())
+        print()
+
+
+def do_print_json():
+    """Output the raw JSON clipboard file."""
+    if not CLIPBOARD_FILE.exists():
+        print("[]")
+        return
+    print(CLIPBOARD_FILE.read_text(), end="")
+
+
+def do_clear():
+    """Clear all accumulated clipboard entries."""
+    if CLIPBOARD_FILE.exists():
+        CLIPBOARD_FILE.unlink()
+    print("Clipboard cleared")
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Unified clipboard manager for Zed editor agent workflows.",
+    )
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument(
+        "--copy",
+        action="store_true",
+        help="Copy selected text from Zed as a fenced code block",
+    )
+    group.add_argument(
+        "--paste-all",
+        action="store_true",
+        help="Paste all accumulated clipboard entries",
+    )
+    group.add_argument(
+        "--print",
+        action="store_true",
+        help="Print all clipboard entries with ages",
+    )
+    group.add_argument(
+        "--print-json",
+        action="store_true",
+        help="Output the raw JSON clipboard file",
+    )
+    group.add_argument(
+        "--clear",
+        action="store_true",
+        help="Clear all accumulated clipboard entries",
+    )
+
+    args = parser.parse_args()
+
+    if args.copy:
+        do_copy()
+    elif args.paste_all:
+        do_paste_all()
+    elif getattr(args, "print"):
+        do_print()
+    elif args.print_json:
+        do_print_json()
+    elif args.clear:
+        do_clear()
+
+
+if __name__ == "__main__":
+    main()

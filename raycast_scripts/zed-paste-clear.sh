@@ -10,4 +10,4 @@
 
 set -eu
 
-rm -f "$TMPDIR/zed-combined-clipboard.txt"
+exec $HOME/code/dotfiles/bin/zed-agent-clipboard --clear
