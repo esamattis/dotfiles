@@ -58,6 +58,14 @@ def pbpaste():
     return subprocess.check_output(["pbpaste"]).decode("utf-8")
 
 
+def format_snippet(entry):
+    """Format an entry as a fenced code block."""
+    rel_file = entry.get("file", "")
+    row = entry.get("row", "")
+    selected_text = entry.get("selected_text", "")
+    return f"\n```{rel_file}#L{row}\n{selected_text}\n```\n"
+
+
 def do_copy():
     """Copy the current Zed selection as a fenced code block and accumulate it."""
     rel_file = os.environ.get("ZED_RELATIVE_FILE", "")
@@ -68,26 +76,25 @@ def do_copy():
         print("No ZED_SELECTED_TEXT set", file=sys.stderr)
         sys.exit(1)
 
-    snippet = f"\n```{rel_file}#L{row}\n{selected_text}\n```\n"
+    # Build entry first, then format for clipboard
+    entry = {
+        "timestamp": time.time(),
+        "file": rel_file,
+        "row": row,
+        "selected_text": selected_text,
+    }
 
-    # Copy to system clipboard
-    pbcopy(snippet)
+    # Copy formatted snippet to system clipboard
+    pbcopy(format_snippet(entry))
 
     # Load existing entries and purge old ones
     entries = load_entries()
     entries = purge_old_entries(entries)
 
-    # Avoid duplicates — check if this exact snippet already exists
-    existing_snippets = {e["text"] for e in entries}
-    if snippet not in existing_snippets:
-        entries.append(
-            {
-                "timestamp": time.time(),
-                "file": rel_file,
-                "row": row,
-                "text": snippet,
-            }
-        )
+    # Avoid duplicates — check if this exact selection already exists
+    existing = {(e.get("file"), e.get("row"), e.get("selected_text")) for e in entries}
+    if (rel_file, row, selected_text) not in existing:
+        entries.append(entry)
 
     save_entries(entries)
     print(f"Copied snippet from {rel_file}#L{row} ({len(entries)} total)")
@@ -100,7 +107,7 @@ def do_paste_all():
         print("No clipboard entries found", file=sys.stderr)
         sys.exit(1)
 
-    combined = "".join(e["text"] for e in entries)
+    combined = "".join(format_snippet(e) for e in entries)
 
     # Save current clipboard
     old_clipboard = pbpaste()
@@ -150,11 +157,12 @@ def do_print():
         file_ref = (
             f"{entry['file']}#L{entry['row']}" if entry.get("file") else "unknown"
         )
-        lines = entry["text"].strip().count("\n") + 1
+        snippet = format_snippet(entry).strip()
+        lines = snippet.count("\n") + 1
         print(
             f"── Entry {i}/{len(entries)}  {file_ref}  ({format_age(age)}, {lines} lines) ──"
         )
-        print(entry["text"].strip())
+        print(snippet)
         print()
 
 
