@@ -79,6 +79,10 @@ fi
 
 cleanup_tmp_commit
 
+if [ -d "$worktree_path/ui" ]; then
+    mkdir -p "$worktree_path/ui/out"
+fi
+
 if [ -f .envrc ]; then
     cp .envrc "$worktree_path/.envrc"
     (
