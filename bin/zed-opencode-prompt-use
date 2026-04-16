@@ -1,0 +1,31 @@
+#!/bin/sh
+
+set -eu
+
+if [ $# -ne 1 ]; then
+    echo "Usage: zed-opencode-prompt-use <file>" >&2
+    exit 1
+fi
+
+file="$1"
+
+if [ ! -f "$file" ]; then
+    echo "File not found: $file" >&2
+    exit 1
+fi
+
+echo "File: $file"
+echo "---"
+cat "$file"
+echo "---"
+printf "Use this prompt? [y/N] "
+read -r answer
+
+if [ "$answer" != "y" ]; then
+    echo "Aborted."
+    exit 1
+fi
+
+contents="$(cat "$file")"
+rm "$file"
+exec opencode-nix --prompt "$contents"

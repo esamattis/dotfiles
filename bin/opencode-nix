@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+
+if [ -z "${IN_NIX_SHELL:-}" ]; then
+    git_root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+    if [ -n "$git_root" ] && [ -f "$git_root/flake.nix" ]; then
+        exec nix develop "$git_root" -c opencode "$@"
+    fi
+fi
+
+exec opencode "$@"

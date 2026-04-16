@@ -1,0 +1,16 @@
+#!/bin/sh
+
+set -eu
+
+if git_root="$(git rev-parse --show-toplevel 2>/dev/null)"; then
+  dir="$git_root/.opencode/my_zed_prompts"
+else
+  dir="$HOME/.config/opencode/my_zed_prompts"
+fi
+mkdir -p "$dir"
+
+timestamp="$(date +%Y%m%d-%H%M%S)"
+file="$dir/prompt-${timestamp}.md"
+
+touch "$file"
+exec zed "$file"
