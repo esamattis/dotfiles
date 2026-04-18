@@ -328,6 +328,14 @@ git-wat() {
     # git standup -A "22-05-2025 00:00:00" -B "22-05-2025 23:59:59" -D local
 }
 
+,oc() {
+    opencode attach --dir "$(pwd)" http://127.0.0.1:4096
+}
+
+,oc-server() {
+    opencode web --port 4096
+}
+
 ,oc-commit() {
     local extra_context="${1:-}"
     local message="Read the git local changes and make one or multiple git commits from it. Do not use conventional commits.
