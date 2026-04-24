@@ -1,0 +1,442 @@
+#!/usr/bin/env python3
+
+"""Open a git worktree selected through fzf in Zed.
+
+Why: this lets worktree selection stay fast and predictable by deriving the
+available choices directly from `git worktree list --porcelain` instead of
+guessing from the filesystem.
+"""
+
+from __future__ import annotations
+
+import argparse
+import stat
+import os
+import shutil
+import subprocess
+import sys
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class WorktreeChoice:
+    """Represents one selectable worktree.
+
+    Why: keeping the display label and target path together avoids subtle bugs
+    where the selected branch name no longer matches the path that should open.
+    """
+
+    label: str
+    path: str
+    sort_timestamp: int
+
+
+def build_parser() -> argparse.ArgumentParser:
+    """Build the command line parser.
+
+    Why: using `argparse` keeps help text, validation, and future flags in one
+    standard place instead of maintaining a custom parser by hand.
+    """
+
+    parser = argparse.ArgumentParser(
+        description=(
+            "Select a git worktree through fzf and open it in Zed, or delete it "
+            "after confirming the selection."
+        ),
+        epilog=(
+            "Selection labels:\n"
+            "  <worktree name>: <branch name>  for branch-backed worktrees\n"
+            "  <worktree name>                 for detached worktrees"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument(
+        "--delete",
+        action="store_true",
+        help="delete the selected worktree after confirmation",
+    )
+    return parser
+
+
+def run_git_worktree_list() -> str:
+    """Return porcelain worktree output from the current git repository.
+
+    Why: the porcelain format is intended for scripts, so it is safer to parse
+    than the human-oriented default output.
+    """
+
+    result = subprocess.run(
+        ["git", "worktree", "list", "--porcelain"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    if result.returncode != 0:
+        sys.stderr.write(result.stderr or "Failed to list git worktrees\n")
+        raise SystemExit(result.returncode)
+
+    return result.stdout
+
+
+def parse_worktree_records(porcelain_output: str) -> list[dict[str, str | bool]]:
+    """Parse `git worktree list --porcelain` output into records.
+
+    Why: the output is grouped by blank lines, so normalizing it into records
+    makes later selection logic straightforward and easier to verify.
+    """
+
+    records: list[dict[str, str | bool]] = []
+    current: dict[str, str | bool] = {}
+
+    for raw_line in porcelain_output.splitlines():
+        line = raw_line.strip()
+
+        if not line:
+            if current:
+                records.append(current)
+                current = {}
+            continue
+
+        key, _, value = line.partition(" ")
+        current[key] = value if value else True
+
+    if current:
+        records.append(current)
+
+    return records
+
+
+def worktree_name(worktree_path: str) -> str:
+    """Derive a friendly worktree name from its path.
+
+    Why: the parent directory is the most stable human-friendly identifier in
+    paths like `/.../native-bloom/project_name`, and that same naming should
+    also appear for branch-backed worktrees so fzf makes the target clearer.
+    """
+
+    normalized_path = os.path.normpath(worktree_path)
+    base_name = os.path.basename(normalized_path)
+    parent_name = os.path.basename(os.path.dirname(normalized_path))
+
+    if parent_name and parent_name != os.path.sep and parent_name != base_name:
+        return parent_name
+
+    return base_name
+
+
+def build_choices(records: list[dict[str, str | bool]]) -> list[WorktreeChoice]:
+    """Build selectable worktree choices from parsed records.
+
+    Why: converting only supported entries here keeps the UI focused on real
+    branch-backed worktrees while still giving detached worktrees a useful name.
+    """
+
+    choices: list[WorktreeChoice] = []
+    labels_seen: set[str] = set()
+
+    for record in records:
+        worktree_path = record.get("worktree")
+        if not isinstance(worktree_path, str) or not worktree_path:
+            continue
+
+        branch = record.get("branch")
+        detached = bool(record.get("detached"))
+
+        if isinstance(branch, str) and branch.startswith("refs/heads/"):
+            label = f"{worktree_name(worktree_path)}: {branch[len('refs/heads/') :]}"
+        elif detached:
+            label = worktree_name(worktree_path)
+        else:
+            continue
+
+        if label in labels_seen:
+            sys.stderr.write(f"Duplicate worktree label: {label}\n")
+            raise SystemExit(1)
+
+        labels_seen.add(label)
+        choices.append(
+            WorktreeChoice(
+                label=label,
+                path=worktree_path,
+                sort_timestamp=last_commit_timestamp(worktree_path),
+            )
+        )
+
+    # Why: showing the most recently updated worktrees first makes the picker
+    # favor the work the user is likeliest to reopen or delete next.
+    choices.sort(key=lambda choice: choice.sort_timestamp, reverse=True)
+
+    return choices
+
+
+def select_choice(choices: list[WorktreeChoice]) -> WorktreeChoice | None:
+    """Ask the user to choose a worktree through fzf.
+
+    Why: fzf already provides the interaction model the workflow expects, so
+    the script should only provide a clean list of labels and map the selection
+    back to the correct worktree path.
+    """
+
+    if not choices:
+        sys.stderr.write("No selectable git worktrees found\n")
+        raise SystemExit(1)
+
+    labels = [choice.label for choice in choices]
+    result = subprocess.run(
+        ["fzf"],
+        check=False,
+        capture_output=True,
+        input="\n".join(labels) + "\n",
+        text=True,
+    )
+
+    if result.returncode != 0:
+        if result.stderr:
+            sys.stderr.write(result.stderr)
+        return None
+
+    selected_label = result.stdout.strip()
+    for choice in choices:
+        if choice.label == selected_label:
+            return choice
+
+    sys.stderr.write(f"Unknown selection: {selected_label}\n")
+    raise SystemExit(1)
+
+
+def open_in_zed(worktree_path: str) -> int:
+    """Open the chosen worktree path with Zed.
+
+    Why: delegating to the `zed` CLI preserves the user's existing editor setup
+    instead of reimplementing editor-launch behavior here.
+    """
+
+    result = subprocess.run(["zed", worktree_path], check=False)
+    return result.returncode
+
+
+def list_local_changes(worktree_path: str) -> list[str]:
+    """Return human-readable local changes in the selected worktree.
+
+    Why: `git worktree remove` refuses both modified and untracked content, so
+    the confirmation should show every blocking path instead of only one class
+    of change.
+    """
+
+    result = subprocess.run(
+        ["git", "-C", worktree_path, "status", "--porcelain", "--untracked-files=all"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    if result.returncode != 0:
+        sys.stderr.write(result.stderr or "Failed to inspect worktree status\n")
+        raise SystemExit(result.returncode)
+
+    local_changes: list[str] = []
+    for line in result.stdout.splitlines():
+        if len(line) < 4:
+            continue
+
+        status = line[:2]
+        path = line[3:]
+
+        # Why: porcelain status codes are terse; expanding them in the prompt
+        # makes it obvious which local work would block deletion.
+        if status == "??":
+            description = "untracked"
+        elif status == " M":
+            description = "modified"
+        elif status == "M ":
+            description = "staged"
+        elif status == "MM":
+            description = "staged + modified"
+        elif status == "A ":
+            description = "staged new"
+        elif status == " D":
+            description = "deleted"
+        elif status == "D ":
+            description = "staged deleted"
+        elif status.startswith("R") or status.endswith("R"):
+            description = "renamed"
+        else:
+            description = f"status {status}"
+
+        local_changes.append(f"  [{description}] {path}")
+
+    return local_changes
+
+
+def last_commit_timestamp(worktree_path: str) -> int:
+    """Return the latest commit timestamp for the selected worktree.
+
+    Why: sorting by commit recency makes the fzf list prioritize the worktrees
+    that have seen the latest activity.
+    """
+
+    result = subprocess.run(
+        ["git", "-C", worktree_path, "log", "-1", "--format=%ct"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    if result.returncode != 0:
+        sys.stderr.write(result.stderr or "Failed to inspect latest commit timestamp\n")
+        raise SystemExit(result.returncode)
+
+    return int(result.stdout.strip() or "0")
+
+
+def last_commit_summary(worktree_path: str) -> str:
+    """Return the latest commit date and title for the selected worktree.
+
+    Why: showing the newest commit makes the delete confirmation easier to
+    evaluate by reminding the user what branch state the worktree currently
+    points to.
+    """
+
+    result = subprocess.run(
+        ["git", "-C", worktree_path, "log", "-1", "--date=short", "--format=%cd %s"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    if result.returncode != 0:
+        sys.stderr.write(result.stderr or "Failed to inspect latest commit\n")
+        raise SystemExit(result.returncode)
+
+    return result.stdout.strip()
+
+
+def confirm_deletion(choice: WorktreeChoice) -> str:
+    """Ask the user whether to delete, open, or cancel.
+
+    Why: removing a worktree is destructive, so the prompt should make the next
+    step explicit while still allowing a quick escape hatch into Zed when the
+    user notices they wanted to inspect the worktree before deleting it.
+    """
+
+    prompt_lines = [f"Delete worktree '{choice.label}' at '{choice.path}'?"]
+    commit_summary = last_commit_summary(choice.path)
+    if commit_summary:
+        prompt_lines.append(f"Last commit: {commit_summary}")
+
+    local_changes = list_local_changes(choice.path)
+    if local_changes:
+        prompt_lines.append("Local changes:")
+        prompt_lines.extend(local_changes)
+
+    prompt_lines.append("[y/N/o] ")
+    prompt = "\n".join(prompt_lines)
+    response = input(prompt)
+    normalized_response = response.strip().lower()
+    if normalized_response in {"y", "yes"}:
+        return "delete"
+    if normalized_response == "o":
+        return "open"
+
+    return "cancel"
+
+
+def delete_worktree(choice: WorktreeChoice) -> int:
+    """Delete the chosen worktree with git after confirmation.
+
+    Why: delegating deletion to `git worktree remove --force` keeps cleanup
+    consistent with git's own behavior while still allowing deliberate removal
+    after the script has shown the local changes in the confirmation prompt.
+    """
+
+    action = confirm_deletion(choice)
+    if action == "open":
+        return open_in_zed(choice.path)
+
+    if action != "delete":
+        sys.stderr.write("Deletion cancelled\n")
+        return 1
+
+    result = subprocess.run(
+        ["git", "worktree", "remove", "--force", choice.path],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.stderr:
+        sys.stderr.write(result.stderr)
+
+    if result.returncode != 0 and "Directory not empty" not in result.stderr:
+        return result.returncode
+
+    if os.path.lexists(choice.path):
+        if remove_directory_tree(choice.path) != 0:
+            return 1
+
+    prune_result = subprocess.run(
+        ["git", "worktree", "prune"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if prune_result.stdout:
+        sys.stdout.write(prune_result.stdout)
+    if prune_result.stderr:
+        sys.stderr.write(prune_result.stderr)
+
+    return prune_result.returncode
+
+
+def remove_directory_tree(directory_path: str) -> int:
+    """Remove a leftover worktree directory tree.
+
+    Why: a confirmed forced delete should leave no stale worktree directory even
+    when Git stops after unregistering the worktree but before deleting files.
+    """
+
+    def on_remove_error(function: object, path: str, exc_info: tuple[object, object, object]) -> None:
+        """Retry removal after making the path writable.
+
+        Why: dependency directories can contain read-only files, so relaxing the
+        permissions avoids leaving a half-deleted worktree behind.
+        """
+
+        del exc_info
+        current_mode = os.stat(path).st_mode
+        os.chmod(path, current_mode | stat.S_IWUSR)
+        function(path)
+
+    try:
+        shutil.rmtree(directory_path, onerror=on_remove_error)
+    except OSError as error:
+        sys.stderr.write(f"Failed to remove leftover worktree directory: {error}\n")
+        return 1
+
+    return 0
+
+
+def main() -> int:
+    """Run the worktree picker workflow.
+
+    Why: keeping orchestration in one place makes the command behavior easy to
+    follow: list worktrees, build choices, select one, then open it.
+    """
+
+    args = build_parser().parse_args(sys.argv[1:])
+
+    choices = build_choices(parse_worktree_records(run_git_worktree_list()))
+    selection = select_choice(choices)
+    if selection is None:
+        return 1
+
+    if args.delete:
+        return delete_worktree(selection)
+
+    return open_in_zed(selection.path)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

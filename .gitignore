@@ -1,2 +1,3 @@
 .opencode/package-lock.json
 bin/zed-setup-worktree-local
+__pycache__
