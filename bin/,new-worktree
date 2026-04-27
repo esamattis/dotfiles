@@ -3,8 +3,8 @@
 set -eu
 
 if [ "${1-}" = "-h" ] || [ "${1-}" = "--help" ]; then
-    echo "Create a new worktree as a sibling directory on a fresh temporary branch."
-    echo "Carries over local changes by making a temporary commit and resetting it in both worktrees."
+    echo "Create a new worktree on a fresh branch."
+    echo "Runs zed-setup-worktree after creating the worktree."
     echo "The temporary branch name is derived from the worktree name."
     exit 0
 fi
@@ -44,52 +44,53 @@ if [ -z "$sanitized_name" ]; then
     exit 1
 fi
 
-tmp_branch="${base_branch}-${sanitized_name}"
-status_output="$(git status --porcelain)"
-tmp_commit_created=0
+branch_ref_exists() {
+    git show-ref --verify --quiet "refs/heads/$1" && return 0
+    git show-ref --verify --quiet "refs/remotes/origin/$1" && return 0
+    return 1
+}
+
+worktree_branch="${sanitized_name}"
+if branch_ref_exists "$worktree_branch"; then
+    branch_found=""
+    i=2
+    while [ "$i" -le 10 ]; do
+        candidate_branch="${sanitized_name}-$i"
+        if ! branch_ref_exists "$candidate_branch"; then
+            worktree_branch="$candidate_branch"
+            branch_found=1
+            break
+        fi
+        i=$((i + 1))
+    done
+
+    if [ -z "$branch_found" ]; then
+        echo "Could not find an unused branch name for $sanitized_name (tried up to -10)" >&2
+        exit 1
+    fi
+fi
+
+worktree_dirname="$worktree_branch"
+
 # Resolve the original repo root from common_dir (.git dir), so this works
 # even when run from inside an existing worktree.
 abs_common_dir="$(cd "$common_dir" && pwd)"
 original_repo="$(dirname "$abs_common_dir")"
-repo_dir_name="$(basename "$original_repo")"
-worktree_path="$(dirname "$original_repo")/${repo_dir_name}-gw-${sanitized_name}"
+original_repo_dirname="$(basename "$original_repo")"
+worktrees_root="${original_repo}/../worktrees/${original_repo_dirname}"
 
-if [ -n "$status_output" ]; then
-    git add -A
-    git commit -m "tmp worktree commit"
-    tmp_commit_created=1
-fi
+mkdir -p "$worktrees_root"
 
-# The tmp commit carries local changes to the new worktree via the commit
-# graph. Once both worktrees have it at HEAD, "reset --mixed HEAD^" undoes the
-# commit in each while keeping the changes as unstaged modifications — restoring
-# the original uncommitted state in both worktrees.
-cleanup_tmp_commit() {
-    if [ "$tmp_commit_created" -eq 1 ]; then
-        git -C "$worktree_path" reset --mixed HEAD^
-        git reset --mixed HEAD^
-    fi
-}
+worktree_path="$(cd "$worktrees_root" && pwd)/${worktree_dirname}"
 
-if ! git worktree add -b "$tmp_branch" "$worktree_path" "$base_branch"; then
-    echo "Failed to create worktree at $worktree_path from new branch $tmp_branch based on $base_branch" >&2
-    cleanup_tmp_commit
+if ! git worktree add -b "$worktree_branch" "$worktree_path" "$base_branch"; then
+    echo "Failed to create worktree at $worktree_path from new branch $worktree_branch based on $base_branch" >&2
     exit 1
 fi
 
-cleanup_tmp_commit
-
-if [ -d "$worktree_path/ui" ]; then
-    mkdir -p "$worktree_path/ui/out"
-fi
-
-if [ -f .envrc ]; then
-    cp .envrc "$worktree_path/.envrc"
-    (
-        cd "$worktree_path"
-        direnv allow
-    )
-fi
+ZED_MAIN_GIT_WORKTREE="$original_repo" \
+ZED_WORKTREE_ROOT="$worktree_path" \
+    zed-setup-worktree
 
 echo
 echo
