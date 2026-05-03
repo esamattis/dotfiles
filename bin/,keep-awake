@@ -54,4 +54,5 @@ h) seconds=$((value * 60 * 60)) ;;
 esac
 
 set -x
+killall caffeinate 2>/dev/null || true
 exec caffeinate -disu -t "$seconds"
