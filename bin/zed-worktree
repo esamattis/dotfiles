@@ -40,8 +40,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     parser = argparse.ArgumentParser(
         description=(
-            "Select a git worktree through fzf and open it in Zed, or delete it "
-            "after confirming the selection."
+            "Select a git worktree through fzf and open it in Zed, print its "
+            "path, or delete it after confirming the selection."
         ),
         epilog=(
             "Selection labels:\n"
@@ -50,10 +50,17 @@ def build_parser() -> argparse.ArgumentParser:
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    parser.add_argument(
+    action_group = parser.add_mutually_exclusive_group()
+    action_group.add_argument(
         "--delete",
         action="store_true",
         help="delete the selected worktree after confirmation",
+    )
+    action_group.add_argument(
+        "--print",
+        action="store_true",
+        dest="print_path",
+        help="print the selected worktree path",
     )
     return parser
 
@@ -434,6 +441,10 @@ def main() -> int:
 
     if args.delete:
         return delete_worktree(selection)
+
+    if args.print_path:
+        sys.stdout.write(f"{selection.path}\n")
+        return 0
 
     return open_in_zed(selection.path)
 
