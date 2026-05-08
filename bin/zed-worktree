@@ -10,12 +10,13 @@ guessing from the filesystem.
 from __future__ import annotations
 
 import argparse
-import stat
 import os
 import shutil
+import stat
 import subprocess
 import sys
 from dataclasses import dataclass
+from typing import Callable
 
 
 @dataclass(frozen=True)
@@ -404,20 +405,24 @@ def remove_directory_tree(directory_path: str) -> int:
     when Git stops after unregistering the worktree but before deleting files.
     """
 
-    def on_remove_error(function: object, path: str, exc_info: tuple[object, object, object]) -> None:
+    def on_remove_exception(
+        function: Callable[[str], object],
+        path: str,
+        exception: BaseException,
+    ) -> None:
         """Retry removal after making the path writable.
 
         Why: dependency directories can contain read-only files, so relaxing the
         permissions avoids leaving a half-deleted worktree behind.
         """
 
-        del exc_info
+        del exception
         current_mode = os.stat(path).st_mode
         os.chmod(path, current_mode | stat.S_IWUSR)
         function(path)
 
     try:
-        shutil.rmtree(directory_path, onerror=on_remove_error)
+        shutil.rmtree(directory_path, onexc=on_remove_exception)
     except OSError as error:
         sys.stderr.write(f"Failed to remove leftover worktree directory: {error}\n")
         return 1
