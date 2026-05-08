@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""Open a git worktree selected through fzf in Zed.
+"""Select a git worktree and run an explicit action on it.
 
 Why: this lets worktree selection stay fast and predictable by deriving the
 available choices directly from `git worktree list --porcelain` instead of
@@ -42,7 +42,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
             "Select a git worktree through fzf and open it in Zed, print its "
-            "path, or delete it after confirming the selection."
+            "path, or delete it after confirming the selection. An explicit "
+            "action flag is required."
         ),
         epilog=(
             "Selection labels:\n"
@@ -52,6 +53,11 @@ def build_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     action_group = parser.add_mutually_exclusive_group()
+    action_group.add_argument(
+        "--zed",
+        action="store_true",
+        help="open the selected worktree in Zed",
+    )
     action_group.add_argument(
         "--delete",
         action="store_true",
@@ -437,7 +443,12 @@ def main() -> int:
     follow: list worktrees, build choices, select one, then open it.
     """
 
-    args = build_parser().parse_args(sys.argv[1:])
+    parser = build_parser()
+    args = parser.parse_args(sys.argv[1:])
+
+    if not (args.zed or args.delete or args.print_path):
+        parser.print_help()
+        return 0
 
     choices = build_choices(parse_worktree_records(run_git_worktree_list()))
     selection = select_choice(choices)
@@ -451,7 +462,11 @@ def main() -> int:
         sys.stdout.write(f"{selection.path}\n")
         return 0
 
-    return open_in_zed(selection.path)
+    if args.zed:
+        return open_in_zed(selection.path)
+
+    parser.print_help()
+    return 0
 
 
 if __name__ == "__main__":
