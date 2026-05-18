@@ -1,0 +1,19 @@
+#!/bin/sh
+
+set -eu
+
+if [ -x /usr/local/bin/zed ]; then
+    # Prefer the host-installed binary when it is directly available.
+    exec /usr/local/bin/zed "$@"
+fi
+
+path=$1
+
+# If the path is relative, convert it to an absolute path on the remote host.
+if [ "${path#/}" = "$path" ]; then
+    # Zed's ssh:// target needs an absolute path on the remote host.
+    path="$(pwd)/$path"
+fi
+
+
+exec hostcmd exec -- zed "ssh://$(hostname)/$path"
