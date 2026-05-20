@@ -1,0 +1,114 @@
+#!/bin/sh
+
+set -eu
+
+base_branch=
+short_branch=false
+rename_branch=false
+base_branch_set=false
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -h|--help)
+            >&2 echo "create or rename a branch with a unique name"
+            >&2 echo "usage: ,branch [-s] [-r] [-b <base>]"
+            >&2 echo "  -s    create a short branch name without the date; requires a slug"
+            >&2 echo "  -r    rename the current branch instead of creating a new branch"
+            exit 0
+            ;;
+        -s)
+            short_branch=true
+            shift
+            ;;
+        -r)
+            rename_branch=true
+            shift
+            ;;
+        -b)
+            shift
+            if [ $# -eq 0 ]; then
+                >&2 echo "missing base branch after -b"
+                exit 1
+            fi
+            base_branch="$1"
+            base_branch_set=true
+            shift
+            ;;
+        *)
+            >&2 echo "unknown argument: $1"
+            exit 1
+            ;;
+    esac
+done
+
+if $rename_branch && $base_branch_set; then
+    >&2 echo "-b cannot be used with -r"
+    exit 1
+fi
+
+if ! $base_branch_set && ! $rename_branch; then
+    echo "Select base branch:"
+    echo "  m) origin/main"
+    echo "  c) current HEAD (default)"
+    printf "> "
+    choice=
+    IFS= read -r choice || choice=
+    case "${choice}" in
+        m|M|m*|M*)
+
+            base_branch="origin/main"
+            ;;
+        c|C|c*|C*|"")
+            # current HEAD; leave base_branch empty
+            ;;
+        *)
+            >&2 echo "invalid choice: ${choice}"
+            exit 1
+            ;;
+    esac
+fi
+
+if [ ! -z "$(git status --porcelain)" ] && [ "${base_branch-}" != "" ]; then
+    >&2 echo "Working tree is dirty"
+    exit 1
+fi
+
+slug=""
+printf "slug> "
+IFS= read -r slug || slug=
+
+if [ "$slug" != "" ]; then
+    slug="$(echo "$slug" | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')"
+elif $short_branch; then
+    >&2 echo "slug is required with -s"
+    exit 1
+elif [ "$base_branch" = "origin/main" ]; then
+    slug="main"
+else
+    slug="$(git rev-parse --abbrev-ref HEAD | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')"
+fi
+
+username="$(git config github.user || whoami)"
+if $short_branch; then
+    branch="$username-$slug"
+else
+    branch="$username-$slug-$(date +"%Y-%m-%d-%H-%M-%S")"
+fi
+
+if $rename_branch; then
+    set -x
+    git branch -m "$branch"
+    set +x
+else
+    set -x
+    git switch -c "$branch"
+    set +x
+
+    if [ "$base_branch" != "" ]; then
+        set -x
+        git reset --hard "$base_branch"
+        set +x
+    fi
+fi
+
+echo "$(date +"%Y-%m-%d %H:%M") $branch" >> "$(git rev-parse --show-toplevel)/.git/random-branch-history.log"
