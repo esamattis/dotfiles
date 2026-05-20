@@ -59,8 +59,9 @@ if [ "$current_branch" != "$branch" ]; then
 fi
 
 target="$remote/$branch"
+target_commit="$(git log -1 --format='%h %s' "$target")"
 
->&2 echo "Reset hard to ${target}?"
+>&2 echo "Reset hard to ${target} (${target_commit})?"
 read -p "type 'y' to continue> " response
 
 if [ "$response" != "y" ]; then
