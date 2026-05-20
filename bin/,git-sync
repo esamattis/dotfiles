@@ -1,0 +1,71 @@
+#!/bin/sh
+
+set -eu
+
+usage() {
+    >&2 echo "usage: ,git-sync <remote> [branch]"
+    >&2 echo
+    >&2 echo "Fetch a remote branch and hard-reset a local branch to match it."
+    >&2 echo
+    >&2 echo "Behavior:"
+    >&2 echo "  1. Run 'git fetch <remote>'."
+    >&2 echo "  2. Use [branch], or default to the current local branch."
+    >&2 echo "  3. Exit if <remote>/<branch> does not exist after fetch."
+    >&2 echo "  4. If not currently on [branch], switch to it, or create it first."
+    >&2 echo "  5. Ask for confirmation before 'git reset --hard <remote>/<branch>'."
+    >&2 echo
+    >&2 echo "Examples:"
+    >&2 echo "  ,git-sync origin"
+    >&2 echo "  ,git-sync origin main"
+}
+
+if [ "${1-}" = "-h" ] || [ "${1-}" = "--help" ]; then
+    usage
+    exit 0
+fi
+
+if [ $# -lt 1 ] || [ $# -gt 2 ]; then
+    usage
+    exit 1
+fi
+
+remote="$1"
+branch="${2-}"
+
+if [ -z "$branch" ]; then
+    branch="$(git branch --show-current)"
+
+    if [ -z "$branch" ]; then
+        >&2 echo "Could not determine current branch"
+        exit 1
+    fi
+fi
+
+git fetch "$remote"
+
+if ! git show-ref --verify --quiet "refs/remotes/$remote/$branch"; then
+    >&2 echo "Remote branch does not exist: $remote/$branch"
+    exit 1
+fi
+
+current_branch="$(git branch --show-current)"
+
+if [ "$current_branch" != "$branch" ]; then
+    if git show-ref --verify --quiet "refs/heads/$branch"; then
+        git switch "$branch"
+    else
+        git switch -c "$branch"
+    fi
+fi
+
+target="$remote/$branch"
+
+>&2 echo "Reset hard to ${target}?"
+read -p "type 'y' to continue> " response
+
+if [ "$response" != "y" ]; then
+    >&2 echo "Abort."
+    exit 1
+fi
+
+git reset --hard "$target"
