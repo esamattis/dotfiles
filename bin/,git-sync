@@ -12,13 +12,15 @@ usage() {
     >&2 echo "  1. Run 'git fetch <remote>'."
     >&2 echo "  2. Use [branch], or default to the current local branch."
     >&2 echo "  3. Exit if <remote>/<branch> does not exist after fetch."
-    >&2 echo "  4. If not currently on [branch], switch to it, or create it first."
-    >&2 echo "  5. Ask for confirmation before 'git reset --hard <remote>/<branch>'."
+    >&2 echo "  4. Exit early if [branch] already matches <remote>/<branch>."
+    >&2 echo "  5. If not currently on [branch], switch to it, or create it first."
+    >&2 echo "  6. Ask for confirmation before 'git reset --hard <remote>/<branch>'."
     >&2 echo
     >&2 echo "Push-back behavior:"
     >&2 echo "  1. Use [branch], or default to the current local branch."
-    >&2 echo "  2. Ask for confirmation before 'git push -f <remote> <branch>:<branch>'."
-    >&2 echo "  3. Tip: run this on the remote first, or the push might fail:"
+    >&2 echo "  2. Exit early if [branch] already matches <remote>/<branch>."
+    >&2 echo "  3. Ask for confirmation before 'git push -f <remote> <branch>:<branch>'."
+    >&2 echo "  4. Tip: run this on the remote first, or the push might fail:"
     >&2 echo "     git config receive.denyCurrentBranch ignore"
     >&2 echo
     >&2 echo "Examples:"
@@ -73,7 +75,20 @@ if [ -z "$branch" ]; then
     fi
 fi
 
+git fetch "$remote"
+
+same_commit() {
+    [ "$(git rev-parse "$1")" = "$(git rev-parse "$2")" ]
+}
+
 if [ "$push_back" -eq 1 ]; then
+    if git show-ref --verify --quiet "refs/heads/$branch" \
+        && git show-ref --verify --quiet "refs/remotes/$remote/$branch" \
+        && same_commit "refs/heads/$branch" "refs/remotes/$remote/$branch"; then
+        echo "Already in sync: '$branch' matches '$remote/$branch'."
+        exit 0
+    fi
+
     >&2 echo "WARNING: this will force-push local '$branch' to '$remote/$branch'."
     >&2 echo "This can overwrite remote history."
     >&2 echo "Tip: run this on the remote first, or the push might fail:"
@@ -90,11 +105,16 @@ if [ "$push_back" -eq 1 ]; then
     exit 0
 fi
 
-git fetch "$remote"
 
 if ! git show-ref --verify --quiet "refs/remotes/$remote/$branch"; then
     >&2 echo "Remote branch does not exist: $remote/$branch"
     exit 1
+fi
+
+if git show-ref --verify --quiet "refs/heads/$branch" \
+    && same_commit "refs/heads/$branch" "refs/remotes/$remote/$branch"; then
+    echo "Already in sync: '$branch' matches '$remote/$branch'."
+    exit 0
 fi
 
 current_branch="$(git branch --show-current)"
