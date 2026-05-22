@@ -1,6 +1,6 @@
 
 # https://stackoverflow.com/a/18814147/153718
-export DOTFILES="${0:A:h}"
+export EM_DOTFILES="${0:A:h}"
 
 _esamatti_dotfiles_init() {
     local os="$(uname)"
@@ -27,7 +27,7 @@ compinit
 promptinit
 
 if [ -x "$(command -v starship)" ]; then
-  export STARSHIP_CONFIG="$DOTFILES/starship.toml"
+  export STARSHIP_CONFIG="$EM_DOTFILES/starship.toml"
   eval "$(starship init zsh)"
 fi
 
@@ -45,7 +45,7 @@ fi
 # not in path on macos?
 export PATH=/usr/local/bin:$PATH
 
-export PATH="${DOTFILES}/bin:$PATH"
+export PATH="${EM_DOTFILES}/bin:$PATH"
 
 # random crap
 export PATH=$HOME/bin:$PATH

@@ -4,4 +4,4 @@ set -eu
 
 
 unset VIMRUNTIME
-exec vim -u "$DOTFILES/vim/vimrc" "$@"
+exec vim -u "$EM_DOTFILES/vim/vimrc" "$@"
