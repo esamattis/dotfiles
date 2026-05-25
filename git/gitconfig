@@ -71,5 +71,8 @@
 	conflictstyle = zdiff3
 [gpg]
 	format = ssh
+[user]
+  name = Esa-Matti Suuronen
+  email = code@esamatti.fi
 [include]
 	path = ~/.gitconfig.local

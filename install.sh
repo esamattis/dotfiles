@@ -4,6 +4,16 @@ set -eu
 
 set -x
 
+if [ ! -f install.sh ]; then
+    mkdir -p "$HOME/code"
+    git clone git@github.com:esamattis/dotfiles.git
+    cd "$HOME/code/dotfiles"
+fi
+
+if [ ! -d "$HOME/code/fzf-tab" ]; then
+    git clone https://github.com/Aloxaf/fzf-tab.git "$HOME/code/fzf-tab"
+fi
+
 rm -f "$HOME/.vimrc"
 ln -sf "$(pwd)/vim/vimrc" "$HOME/.vimrc"
 
