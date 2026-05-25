@@ -24,3 +24,10 @@ ln -sf "$(pwd)/vim/vimrc" "$HOME/.config/nvim/init.vim"
 ln -sf "$(pwd)/git/gitconfig" "$HOME/.gitconfig"
 
 git config --global core.hooksPath "$(pwd)/git/hooks"
+
+zshrc_line='source "$HOME/code/dotfiles/init.zsh"'
+zshrc_file="$HOME/.zshrc"
+
+if ! grep -Fqx "$zshrc_line" "$zshrc_file"; then
+    printf '%s\n' "$zshrc_line" >> "$zshrc_file"
+fi

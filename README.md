@@ -2,16 +2,8 @@
 
 Personal crap.
 
-
 ```sh
-mkdir -p  $HOME/code
-git clone git@github.com:esamattis/dotfiles.git ~/code/dotfiles
-```
-
-Add to `~/.zshrc`
-
-```sh
-echo 'source "$HOME/code/dotfiles/init.zsh"' >> ~/.zshrc
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/esamattis/dotfiles/main/install.sh)"
 ```
 
 ## Tools from homebrew
@@ -37,12 +29,6 @@ brew install yazi
 
 ```
 sudo apt install git fzf btop vim git-delta starship jq
-```
-
-## fzf-tab
-
-```
-git clone https://github.com/Aloxaf/fzf-tab.git ~/code/fzf-tab
 ```
 
 
