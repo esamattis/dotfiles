@@ -2,8 +2,6 @@
 
 set -eu
 
-set -x
-
 if [ ! -f install.sh ]; then
     mkdir -p "$HOME/code"
     git clone git@github.com:esamattis/dotfiles.git
