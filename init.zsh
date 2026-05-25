@@ -1,4 +1,9 @@
 
+if [[ -n "${EM_DOTFILES_INIT_DONE:-}" ]]; then
+    return
+fi
+typeset -g EM_DOTFILES_INIT_DONE=1
+
 # https://stackoverflow.com/a/18814147/153718
 export EM_DOTFILES="${0:A:h}"
 
