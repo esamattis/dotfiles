@@ -4,11 +4,8 @@ Personal crap.
 
 
 ```sh
-cd $HOME/code
-```
-
-```sh
-git clone git@github.com:esamattis/dotfiles.git
+mkdir -p  $HOME/code
+git clone git@github.com:esamattis/dotfiles.git ~/code/dotfiles
 ```
 
 Add to `~/.zshrc`
@@ -25,7 +22,7 @@ brew install television
 brew install git-delta
 brew install jq
 brew install fzf
-brew install htop
+brew install btop
 brew install pngpaste
 brew install smudge/smudge/nightlight
 brew install gh
@@ -36,10 +33,15 @@ brew install sevenzip
 brew install yazi
 ```
 
+## apt
+
+```
+sudo apt install git fzf btop vim git-delta starship jq
+```
+
 ## fzf-tab
 
 ```
-mkdir -p ~/code
 git clone https://github.com/Aloxaf/fzf-tab.git ~/code/fzf-tab
 ```
 
