@@ -36,6 +36,13 @@ brew install sevenzip
 brew install yazi
 ```
 
+## fzf-tab
+
+```
+mkdir -p ~/code
+git clone https://github.com/Aloxaf/fzf-tab.git ~/code/fzf-tab
+```
+
 
 ## Allow SSH access
 
