@@ -11,7 +11,7 @@ git clone git@github.com:esamattis/dotfiles.git ~/code/dotfiles
 Add to `~/.zshrc`
 
 ```sh
-source "$HOME/code/dotfiles/init.zsh"
+echo 'source "$HOME/code/dotfiles/init.zsh"' >> ~/.zshrc
 ```
 
 ## Tools from homebrew
