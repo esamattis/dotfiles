@@ -49,22 +49,6 @@ rm -rf .homegit-tmp
 ,config st
 ```
 
-## Git config
-
-.gitconfig.local
-
-```
-[user]
-  name = Esa-Matti Suuronen
-  email = code@esamatti.fi
-  #signingkey = ~/.ssh/id_ed25519.pub
-#[commit]
-#  gpgsign = true
-[github]
-  user = esamattis
-```
-
-
 ## Aerospace
 
 https://github.com/FelixKratz/JankyBorders

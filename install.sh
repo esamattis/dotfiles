@@ -21,6 +21,10 @@ ln -sf "$(pwd)/vim/vimrc" "$HOME/.config/nvim/init.vim"
 
 ln -sf "$(pwd)/git/gitconfig" "$HOME/.gitconfig"
 
+if [ ! -f "$HOME/.gitconfig.local" ]; then
+    ln -sf "$(pwd)/git/gitconfig.local" "$HOME/.gitconfig.local"
+fi
+
 git config --global core.hooksPath "$(pwd)/git/hooks"
 
 zshrc_line='source "$HOME/code/dotfiles/init.zsh"'
