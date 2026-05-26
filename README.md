@@ -38,17 +38,6 @@ sudo apt install git fzf btop vim git-delta starship jq
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/esamattis/dotfiles/refs/heads/main/allow-github-keys.sh)"
 ```
 
-## Home homegit
-
-Credits https://news.ycombinator.com/item?id=11071754
-
-```
-git clone --separate-git-dir=$HOME/.homegit git@github.com:esamattis/homegit.git $HOME/.homegit-tmp
-,config config status.showUntrackedFiles no
-rm -rf .homegit-tmp
-,config st
-```
-
 ## Aerospace
 
 https://github.com/FelixKratz/JankyBorders
