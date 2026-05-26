@@ -209,9 +209,12 @@ export FZF_CTRL_T_COMMAND=esamatti-fzf-find
 
 zstyle ':fzf-tab:*' fzf-flags --bind "tab:toggle,enter:accept"
 
-export EDITOR=nvim
-alias vim=nvim
-alias vi=nvim
+if [ -x "$(command -v nvim)" ]; then
+    export EDITOR=nvim
+    alias vim=nvim
+else
+    export EDITOR=vim
+fi
 
 # Zed autocomplete with args does not work. This is a workaround.
 compdef _gnu_generic zed
