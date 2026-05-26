@@ -12,6 +12,10 @@ if [ -s "$changed_paths" ]; then
   rsync -a --from0 --files-from="$changed_paths" "$ZED_MAIN_GIT_WORKTREE/" "$ZED_WORKTREE_ROOT/"
 fi
 
+if [ -f "$ZED_MAIN_GIT_WORKTREE/.envrc" ]; then
+    cp "$ZED_MAIN_GIT_WORKTREE/.envrc" "$ZED_WORKTREE_ROOT/.envrc"
+fi
+
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 local_setup_script="$script_dir/zed-setup-worktree-local"
 
