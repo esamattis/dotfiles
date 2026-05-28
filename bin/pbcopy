@@ -6,4 +6,4 @@ if [ "$(uname)" = "Darwin" ]; then
     exec /usr/bin/pbcopy "$@"
 fi
 
-exec hostcmd exec -- /usr/bin/pbcopy "$@"
+exec hostcmd exec -- pbcopy "$@"
