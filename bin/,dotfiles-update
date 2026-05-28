@@ -1,0 +1,10 @@
+#!/bin/sh
+
+set -eu
+
+set -x
+
+cd "$EM_DOTFILES"
+
+
+git pull || git pull https://github.com/esamattis/dotfiles.git
