@@ -7,13 +7,37 @@ if [ -x /usr/local/bin/zed ]; then
     exec /usr/local/bin/zed "$@"
 fi
 
-path=$1
+host=$(hostname)
+remaining=$#
 
-# If the path is relative, convert it to an absolute path on the remote host.
-if [ "${path#/}" = "$path" ]; then
-    # Zed's ssh:// target needs an absolute path on the remote host.
-    path="$(pwd)/$path"
-fi
+# Rebuild the argument list so Zed CLI options keep their original position,
+# while file paths are rewritten to point back to this remote machine.
+while [ "$remaining" -gt 0 ]; do
+    arg=$1
+    shift
+    remaining=$((remaining - 1))
 
+    case "$arg" in
+        -*)
+            # Preserve options such as --wait. Treating them as paths would produce
+            # invalid ssh:// URLs and hide the option from the host-side Zed process.
+            ;;
+        *)
+            path=$arg
 
-exec hostcmd exec -- zed "ssh://$(hostname)/$path"
+            # If the path is relative, convert it to an absolute path on the remote host.
+            if [ "${path#/}" = "$path" ]; then
+                # Zed's ssh:// target needs an absolute path on the remote host.
+                path="$(pwd)/$path"
+            fi
+
+            # The host-side Zed process cannot see the remote filesystem directly,
+            # so pass paths through its SSH URL scheme instead.
+            arg="ssh://$host/$path"
+            ;;
+    esac
+
+    set -- "$@" "$arg"
+done
+
+exec hostcmd exec -- zed "$@"
