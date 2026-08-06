@@ -4,7 +4,7 @@ set -eu
 
 if [ ! -f install.sh ]; then
     mkdir -p "$HOME/code"
-    git clone git@github.com:esamattis/dotfiles.git
+    git clone git@github.com:esamattis/dotfiles.git "$HOME/code/dotfiles"
     cd "$HOME/code/dotfiles"
 fi
 
