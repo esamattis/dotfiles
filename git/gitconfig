@@ -46,7 +46,7 @@
 [core]
 	pager = delta
 	excludesFile = ~/.gitignore
-	hooksPath = ~/code/dotfiles/git/hooks
+	hooksPath = /home/esamatti/code/dotfiles/git/hooks
 [diff]
 	tool = difftastic
 [difftool]
