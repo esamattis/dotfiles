@@ -6,7 +6,7 @@ usage() {
     cat <<'EOF'
 Usage: $(basename "$0") [duration]
 
-Keep the system awake using `caffeinate -disu`.
+Keep the system awake using `caffeinate` or `systemd-inhibit`.
 
 Duration defaults to `1h`. Supported suffixes: `s`, `m`, `h`.
 Examples: `30m`, `45s`, `2h`, `3600`
@@ -53,6 +53,17 @@ h) seconds=$((value * 60 * 60)) ;;
     ;;
 esac
 
-set -x
-killall caffeinate 2>/dev/null || true
-exec caffeinate -disu -t "$seconds"
+if command -v caffeinate >/dev/null 2>&1; then
+    set -x
+    killall caffeinate 2>/dev/null || true
+    exec caffeinate -disu -t "$seconds"
+elif command -v systemd-inhibit >/dev/null 2>&1; then
+    set -x
+    exec systemd-inhibit \
+        --what=idle:sleep \
+        --why="Keep the system awake for $duration" \
+        sleep "$seconds"
+else
+    printf 'Neither caffeinate nor systemd-inhibit is available.\n' >&2
+    exit 1
+fi
