@@ -95,7 +95,12 @@ def clipboard_commands():
 
 def clipboard_copy(text):
     """Copy text to the system clipboard."""
-    copy_command, _ = clipboard_commands()
+    try:
+        copy_command, _ = clipboard_commands()
+    except RuntimeError:
+        if not command_exists("pbcopy"):
+            raise
+        copy_command = ["pbcopy"]
     subprocess.run(copy_command, input=text, text=True, check=True)
 
 
