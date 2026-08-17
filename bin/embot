@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -eu
+
+message="\`$(id -un)@$(hostname)\`: $*"
+
+response=$(curl --silent --show-error --fail-with-body \
+  -X POST https://slack.com/api/chat.postMessage \
+  -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+  --data-urlencode "channel=$EMBOT_CHANNEL_ID" \
+  --data-urlencode "text=$message") || {
+  status=$?
+  printf '%s\n' "$response" >&2
+  exit "$status"
+}
