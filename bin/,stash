@@ -1,0 +1,49 @@
+#!/bin/sh
+
+set -eu
+
+usage() {
+    printf 'Usage: %s [-d|--desktop] [-h|--help]\n' "${0##*/}"
+    printf 'Move files and directories into a dated _stash directory in Downloads (default) or Desktop.\n'
+}
+
+if [ "$#" -gt 1 ]; then
+    usage >&2
+    exit 1
+fi
+
+directory="$HOME/Downloads"
+if [ "$#" -eq 1 ]; then
+    case "$1" in
+        -d|--desktop) directory="$HOME/Desktop" ;;
+        -h|--help) usage; exit 0 ;;
+        *) usage >&2; exit 1 ;;
+    esac
+fi
+
+stash="$directory/_stash/$(date +%Y-%m-%d)"
+
+mkdir -p "$stash"
+
+# Match visible names and hidden names, including those starting with two dots,
+# without matching the special . and .. directory entries.
+for file in "$directory"/* "$directory"/.[!.]* "$directory"/..?*; do
+    if [ "$file" = "$directory/_stash" ]; then
+        continue
+    fi
+    # Unmatched globs remain literal paths; keep dangling symlinks, which -e misses.
+    if [ ! -e "$file" ] && [ ! -L "$file" ]; then
+        continue
+    fi
+
+    name=${file##*/}
+    destination="$stash/$name"
+    number=1
+    # Keep existing items by adding a number to duplicate names.
+    while [ -e "$destination" ] || [ -L "$destination" ]; do
+        destination="$stash/$name.$number"
+        number=$((number + 1))
+    done
+
+    mv "$file" "$destination"
+done
