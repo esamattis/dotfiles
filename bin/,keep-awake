@@ -56,7 +56,7 @@ esac
 if command -v caffeinate >/dev/null 2>&1; then
     set -x
     killall caffeinate 2>/dev/null || true
-    exec caffeinate -disu -t "$seconds"
+    exec caffeinate -is -t "$seconds"
 elif command -v systemd-inhibit >/dev/null 2>&1; then
     set -x
     exec systemd-inhibit \
