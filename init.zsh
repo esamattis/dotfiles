@@ -149,7 +149,10 @@ repeat_n () {
 }
 
 # fzf keybindings install:
-if [ "$(command -v fzf)" != "" ]; then
+# Only with a terminal on stdin: without one (systemd units, cron, `ssh host
+# cmd`) zsh cannot enable zle, and fzf's option restore prints
+# "can't change option: zle".
+if [ "$(command -v fzf)" != "" ] && [[ -t 0 ]]; then
     source <(fzf --zsh)
 fi
 
