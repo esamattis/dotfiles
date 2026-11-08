@@ -381,6 +381,13 @@ git-wat() {
 # auto complete git-commands
 zstyle ':completion:*:*:git:*' user-commands ${${(M)${(k)commands}:#git-*}#git-}
 
+
+
+# Use the systemd user ssh-agent unless an agent is already set (e.g. forwarded).
+if [ -z "$SSH_AUTH_SOCK" ] && [ -S "$XDG_RUNTIME_DIR/openssh_agent" ]; then
+    export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/openssh_agent"
+fi
+
 if [ "${ZED_TERM}" = "true" ]; then
     export VISUAL="zed --wait"
 fi
