@@ -47,11 +47,16 @@ if [ ! -e "$HOME/.gitconfig.local" ] && [ ! -L "$HOME/.gitconfig.local" ]; then
 [user]
     name = Esa-Matti Suuronen
     email = code@esamatti.fi
-    #signingkey = ~/.ssh/id_ed25519.pub
-#[commit]
-#    gpgsign = true
+    signingkey = ~/.ssh/id_ed25519.pub
+[commit]
+    gpgsign = true
+[gpg]
+    format = ssh
 [github]
     user = esamattis
+# Identity managed outside of dotfiles
+[include]
+    path = ~/.gitconfig.user
 GITCONFIG
 elif ! git config --file "$HOME/.gitconfig.local" --get-all include.path 2>/dev/null | grep -q 'dotfiles/git/gitconfig$'; then
     echo "WARNING: $HOME/.gitconfig.local does not include $repo_gitconfig" >&2

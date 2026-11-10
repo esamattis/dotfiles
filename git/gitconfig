@@ -68,5 +68,3 @@
 	navigate = true
 [merge]
 	conflictstyle = zdiff3
-[gpg]
-	format = ssh
