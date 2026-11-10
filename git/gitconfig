@@ -70,5 +70,3 @@
 	conflictstyle = zdiff3
 [gpg]
 	format = ssh
-[include]
-	path = ~/.gitconfig.local
