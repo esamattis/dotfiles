@@ -5,7 +5,7 @@ set -eu
 mkdir -p "$HOME/code"
 
 if [ ! -f install.sh ]; then
-    git clone git@github.com:esamattis/dotfiles.git "$HOME/code/dotfiles"
+    git clone https://github.com/esamattis/dotfiles.git "$HOME/code/dotfiles"
     cd "$HOME/code/dotfiles"
 fi
 
